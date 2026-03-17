@@ -75,6 +75,17 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
+    MIME = {
+        ".html": "text/html; charset=utf-8",
+        ".json": "application/json",
+        ".png":  "image/png",
+        ".jpg":  "image/jpeg",
+        ".ico":  "image/x-icon",
+        ".js":   "application/javascript",
+        ".css":  "text/css",
+        ".webp": "image/webp",
+    }
+
     def do_GET(self):
         path = self.path.split("?")[0]
 
@@ -95,7 +106,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": "not found"}, 404)
 
         else:
-            self.send_file(STATIC / "index.html", "text/html; charset=utf-8")
+            # Serve static files (icons, manifest, sw.js, splash screens)
+            static_file = STATIC / path.lstrip("/")
+            if static_file.exists() and static_file.is_file():
+                ext = static_file.suffix.lower()
+                mime = self.MIME.get(ext, "application/octet-stream")
+                self.send_file(static_file, mime)
+            else:
+                self.send_file(STATIC / "index.html", "text/html; charset=utf-8")
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))

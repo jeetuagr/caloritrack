@@ -2,9 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+
+<!-- PWA / iOS metadata -->
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CaloriTrack"/>
+<meta name="theme-color" content="#0d0f0a"/>
+<meta name="description" content="Personal calorie and nutrition tracker"/>
+
+<!-- Web App Manifest -->
+<link rel="manifest" href="/manifest.json"/>
+
+<!-- iOS icons -->
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="apple-touch-icon" sizes="57x57"   href="/icon-57.png"/>
+<link rel="apple-touch-icon" sizes="60x60"   href="/icon-60.png"/>
+<link rel="apple-touch-icon" sizes="72x72"   href="/icon-72.png"/>
+<link rel="apple-touch-icon" sizes="76x76"   href="/icon-76.png"/>
+<link rel="apple-touch-icon" sizes="114x114" href="/icon-114.png"/>
+<link rel="apple-touch-icon" sizes="120x120" href="/icon-120.png"/>
+<link rel="apple-touch-icon" sizes="144x144" href="/icon-144.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png"/>
+<link rel="apple-touch-icon" sizes="167x167" href="/icon-167.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png"/>
+
+<!-- iOS splash screens -->
+<link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"   href="/splash-640x1136.png"/>
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"   href="/splash-750x1334.png"/>
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"   href="/splash-1125x2436.png"/>
+<link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"   href="/splash-1170x2532.png"/>
+<link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"   href="/splash-1179x2556.png"/>
+<link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"   href="/splash-1290x2796.png"/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/favicon.png"/>
+
 <title>CaloriTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -14,29 +48,32 @@
   --acc:#b8e04a;--acc2:#4ae0a8;--txt:#e8ead4;--mut:#6b7060;
   --red:#e04a4a;--r:12px;
 }
-body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh}
-.app{display:flex;flex-direction:column;min-height:100vh}
-.hdr{padding:14px 24px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+/* iOS safe areas */
+.hdr{padding:14px 24px;padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
 .logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--acc);letter-spacing:-.5px;flex-shrink:0}
 .logo span{color:var(--txt)}
-.nav{display:flex;gap:3px;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--bor);overflow-x:auto;flex:1;max-width:600px}
-.nb{padding:7px 13px;border:none;background:transparent;color:var(--mut);font-family:'DM Mono',monospace;font-size:11px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.nav{display:flex;gap:3px;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--bor);overflow-x:auto;flex:1;max-width:600px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nb{padding:7px 13px;border:none;background:transparent;color:var(--mut);font-family:'DM Mono',monospace;font-size:11px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;-webkit-touch-callout:none;user-select:none}
 .nb.on{background:var(--acc);color:var(--bg);font-weight:500}
 .nb:hover:not(.on){color:var(--txt);background:var(--card)}
 
-.pg{flex:1;padding:28px 24px;max-width:960px;margin:0 auto;width:100%}
+.pg{flex:1;padding:28px 24px;padding-bottom:max(28px,env(safe-area-inset-bottom));padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));max-width:960px;margin:0 auto;width:100%}
 .h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--txt);margin-bottom:6px}
 .sub{color:var(--mut);font-size:12px;margin-bottom:24px;line-height:1.7}
 .card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:22px;margin-bottom:18px}
 .ct{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--acc);margin-bottom:14px;font-weight:500}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.btn{padding:10px 18px;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn{padding:10px 18px;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .15s;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;-webkit-touch-callout:none;user-select:none;touch-action:manipulation}
+.btn:active{transform:scale(0.97);opacity:.85}
 .bp{background:var(--acc);color:var(--bg)}.bp:hover{background:#cdf562}
 .bs{background:var(--bor);color:var(--txt)}.bs:hover{background:#3a3e32}
 .br{background:rgba(224,74,74,.12);color:var(--red);border:1px solid rgba(224,74,74,.2)}
 .sm{padding:6px 11px;font-size:11px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.inp{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s}
+.inp{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:'DM Mono',monospace;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--acc)}
 .ig{display:flex;gap:8px;margin-bottom:10px}.ig .inp{flex:1}
 select.inp{cursor:pointer}
@@ -515,22 +552,55 @@ function bindAfterRender(){
   }
 }
 
+// ── Service Worker registration ───────────────────────────────────────────────
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").then(reg => {
+    console.log("SW registered:", reg.scope);
+  }).catch(err => console.log("SW error:", err));
+}
+
+// ── iOS install banner ────────────────────────────────────────────────────────
+function showInstallBanner(){
+  // Only show in Safari on iOS, not already installed as PWA
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem("install_dismissed");
+  if(!isIOS || !isSafari || isStandalone || dismissed) return;
+
+  const banner = document.createElement("div");
+  banner.id = "install-banner";
+  banner.style.cssText = `position:fixed;bottom:0;left:0;right:0;background:#1a1e14;border-top:1px solid #2a2e22;padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));z-index:500;display:flex;align-items:center;gap:12px;animation:su .3s ease`;
+  banner.innerHTML = `
+    <img src="/icon-60.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"/>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:500;color:var(--txt)">Add CaloriTrack to Home Screen</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Tap <strong style="color:var(--txt)">Share</strong> then <strong style="color:var(--txt)">"Add to Home Screen"</strong></div>
+    </div>
+    <button onclick="document.getElementById('install-banner').remove();localStorage.setItem('install_dismissed','1')"
+      style="border:none;background:transparent;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;line-height:1">×</button>`;
+  document.body.appendChild(banner);
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
-  // Show loading state
-  document.getElementById("page").innerHTML = `<div style="text-align:center;padding:80px;color:var(--mut);font-size:12px"><div class="spin" style="margin:0 auto 16px"></div>Loading your data…</div>`;
+  document.getElementById("page").innerHTML = `<div style="text-align:center;padding:80px;color:var(--mut);font-size:12px"><div class="spin" style="margin:0 auto 16px"></div>Loading…</div>`;
   await loadDB();
   render();
   checkKeyStatus();
+  // Show iOS install prompt after 3 seconds
+  setTimeout(showInstallBanner, 3000);
   // Poll for updates from other devices every 30 seconds
   setInterval(async ()=>{
-    const fresh = {ingredients:[],rawIngredients:[],recipes:[]};
-    try{ const r=await fetch("/api/data"); if(r.ok) Object.assign(fresh, await r.json()); } catch{}
-    // Only re-render if data actually changed
-    if(JSON.stringify(fresh) !== JSON.stringify(DB)){
-      DB = fresh;
-      render();
-    }
+    try{
+      const r = await fetch("/api/data");
+      if(!r.ok) return;
+      const fresh = await r.json();
+      if(JSON.stringify(fresh) !== JSON.stringify(DB)){
+        DB = fresh;
+        render();
+      }
+    } catch{}
   }, 30000);
 })();
 </script>
