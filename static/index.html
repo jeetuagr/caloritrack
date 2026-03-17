@@ -172,9 +172,21 @@ async function callClaude(messages, system=""){
   return d.content?.map(b=>b.text||"").join("")||"";
 }
 
-async function scanLabel(b64){
+async function scanLabel(dataUrl){
+  // dataUrl may be "data:image/jpeg;base64,..." or "data:image/png;base64,..."
+  // Always convert to JPEG via canvas first for maximum API compatibility
+  const parts = dataUrl.split(",");
+  const mimeMatch = parts[0].match(/data:(image\/[^;]+)/);
+  const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+  const b64 = parts[1];
+
+  // Supported by Anthropic API: image/jpeg, image/png, image/gif, image/webp
+  // If we somehow got something else, it means canvas conversion worked and gave us jpeg
+  const safeMime = ["image/jpeg","image/png","image/gif","image/webp"].includes(mime)
+    ? mime : "image/jpeg";
+
   const sys=`You are a nutrition label reader. Return ONLY a raw JSON object, no markdown:\n{"productName":string,"servingSize":string,"caloriesPerServing":number,"protein":number,"carbs":number,"fat":number,"fiber":number|null,"ingredients":string}`;
-  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
+  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:safeMime,data:b64}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
 }
 
@@ -283,11 +295,57 @@ function camboxClick(){if(!scanCaptured&&!camStream) document.getElementById("fi
 
 function handleDrop(e){
   e.preventDefault(); document.getElementById("cambox").classList.remove("drag");
-  const f=e.dataTransfer.files[0]; if(!f||!f.type.startsWith("image/")) return;
-  readFile(f);
+  const f=e.dataTransfer.files[0];
+  if(!f) return;
+  if(!f.type.startsWith("image/") && !f.name.match(/\.(heic|heif|jpg|jpeg|png|gif|webp|bmp|tiff?)$/i)){
+    toast("Please upload an image file (JPG, PNG, HEIC, etc.)","e"); return;
+  }
+  convertToJpeg(f);
 }
-function handleFileInput(inp){const f=inp.files[0];if(f) readFile(f);}
-function readFile(f){const r=new FileReader();r.onload=ev=>showCaptured(ev.target.result);r.readAsDataURL(f);}
+function handleFileInput(inp){const f=inp.files[0];if(f) convertToJpeg(f);}
+
+// Convert ANY image format (including HEIC, PNG, BMP, TIFF, WEBP) to JPEG via canvas
+// This works because the browser's Image decoder handles all formats,
+// and canvas.toDataURL always outputs JPEG
+function convertToJpeg(file){
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = function(){
+    const canvas = document.createElement("canvas");
+    // Cap at 1800px on longest side to keep payload small but readable
+    const MAX = 1800;
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if(w > MAX || h > MAX){
+      if(w > h){ h = Math.round(h * MAX/w); w = MAX; }
+      else { w = Math.round(w * MAX/h); h = MAX; }
+    }
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    // White background handles transparent PNGs
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+    const jpeg = canvas.toDataURL("image/jpeg", 0.90);
+    showCaptured(jpeg);
+  };
+  img.onerror = function(){
+    URL.revokeObjectURL(url);
+    // Canvas couldn't decode it (common with HEIC on some browsers)
+    // Fall back to sending raw file and let the server/API handle it
+    const reader = new FileReader();
+    reader.onload = ev => {
+      // Try to detect if it's HEIC and warn user
+      const isHeic = file.name.match(/\.(heic|heif)$/i) || file.type === "image/heic" || file.type === "image/heif";
+      if(isHeic){
+        toast("HEIC format detected. If analysis fails, go to iPhone Settings → Camera → Formats → Most Compatible to save as JPEG instead.","i");
+      }
+      showCaptured(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+  img.src = url;
+}
 
 async function startCam(){
   const errEl=document.getElementById("camerr");
@@ -345,7 +403,7 @@ async function analyzeLabel(){
   const ld=document.getElementById("scanld");ld.style.display="flex";
   document.getElementById("scanresult").innerHTML="";
   try{
-    const info=await scanLabel(scanCaptured.split(",")[1]);
+    const info=await scanLabel(scanCaptured);
     ld.style.display="none";
     if(!info){document.getElementById("scanresult").innerHTML=`<div class="errbox">Could not parse label. Try a clearer, well-lit photo with the full nutrition panel visible.</div>`;return;}
     scanResult=info;showScanResult(info);
