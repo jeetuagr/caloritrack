@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>CaloriTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f0a;--sur:#141710;--card:#1a1e14;--bor:#2a2e22;
+  --acc:#b8e04a;--acc2:#4ae0a8;--txt:#e8ead4;--mut:#6b7060;
+  --red:#e04a4a;--r:12px;
+}
+body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.hdr{padding:14px 24px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--acc);letter-spacing:-.5px;flex-shrink:0}
+.logo span{color:var(--txt)}
+.nav{display:flex;gap:3px;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--bor);overflow-x:auto;flex:1;max-width:600px}
+.nb{padding:7px 13px;border:none;background:transparent;color:var(--mut);font-family:'DM Mono',monospace;font-size:11px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.nb.on{background:var(--acc);color:var(--bg);font-weight:500}
+.nb:hover:not(.on){color:var(--txt);background:var(--card)}
+
+.pg{flex:1;padding:28px 24px;max-width:960px;margin:0 auto;width:100%}
+.h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--txt);margin-bottom:6px}
+.sub{color:var(--mut);font-size:12px;margin-bottom:24px;line-height:1.7}
+.card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.ct{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--acc);margin-bottom:14px;font-weight:500}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.btn{padding:10px 18px;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.bp{background:var(--acc);color:var(--bg)}.bp:hover{background:#cdf562}
+.bs{background:var(--bor);color:var(--txt)}.bs:hover{background:#3a3e32}
+.br{background:rgba(224,74,74,.12);color:var(--red);border:1px solid rgba(224,74,74,.2)}
+.sm{padding:6px 11px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.inp{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--acc)}
+.ig{display:flex;gap:8px;margin-bottom:10px}.ig .inp{flex:1}
+select.inp{cursor:pointer}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);padding:8px 10px;border-bottom:1px solid var(--bor)}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--bor);font-size:12px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--sur)}
+.bdg{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
+.bgg{background:rgba(184,224,74,.15);color:var(--acc)}
+.bgb{background:rgba(74,224,168,.15);color:var(--acc2)}
+.mrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.mpill{flex:1;min-width:75px;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px;text-align:center}
+.mpv{font-size:17px;color:var(--acc);font-weight:500}
+.mpl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-top:2px}
+.hero{text-align:center;padding:22px 20px;background:linear-gradient(135deg,rgba(184,224,74,.08),rgba(74,224,168,.05));border-radius:10px;border:1px solid rgba(184,224,74,.2);margin-bottom:18px}
+.hv{font-family:'Playfair Display',serif;font-size:54px;color:var(--acc);line-height:1}
+.hl{color:var(--mut);font-size:11px;margin-top:5px;text-transform:uppercase;letter-spacing:1px}
+.srow{display:flex;align-items:center;gap:12px;margin-top:16px}
+.srow label{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.srow input[type=range]{flex:1;accent-color:var(--acc)}
+.srow .val{color:var(--acc);font-size:14px;font-weight:500;min-width:36px;text-align:right}
+.ld{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;padding:10px 0}
+.spin{width:16px;height:16px;border:2px solid var(--bor);border-top-color:var(--acc);border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px;color:var(--mut);font-size:12px;line-height:1.8}
+.cambox{width:100%;aspect-ratio:4/3;max-height:320px;background:var(--bg);border:2px dashed var(--bor);border-radius:10px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
+.cambox.drag{border-color:var(--acc);background:rgba(184,224,74,.04)}
+.cambox video,.cambox img{width:100%;height:100%;object-fit:cover;display:block}
+.camhint{color:var(--mut);font-size:12px;text-align:center;line-height:1.9;pointer-events:none;padding:20px}
+.rir{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor)}
+.rir:last-child{border-bottom:none}
+.rec-card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s}
+.rec-card:hover{border-color:var(--acc)}
+.stat{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:16px 18px}
+.stat-val{font-family:'Playfair Display',serif;font-size:30px;color:var(--acc);line-height:1}
+.stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;animation:su .3s ease;max-width:340px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.ts{background:var(--acc);color:var(--bg)}.te{background:var(--red);color:#fff}.ti{background:#1a6b3a;color:#afffcc;border:1px solid #2a9b5a}
+@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.errbox{padding:12px 14px;background:rgba(224,74,74,.08);border:1px solid rgba(224,74,74,.25);border-radius:8px;font-size:11px;color:#f0a0a0;line-height:1.7;margin-top:10px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal{background:var(--card);border:1px solid var(--bor);border-radius:16px;padding:32px;max-width:480px;width:100%}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.hdr{flex-direction:column;align-items:stretch}.nav{max-width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="logo">calori<span>track</span></div>
+    <nav class="nav" id="nav"></nav>
+  </header>
+  <main class="pg" id="page"></main>
+</div>
+<div id="toast" class="toast" style="display:none"></div>
+<div id="modal" style="display:none"></div>
+
+<script>
+// ── Storage ───────────────────────────────────────────────────────────────────
+const DBKEY = "caloritrack_v1";
+function loadDB(){try{const s=localStorage.getItem(DBKEY);return s?JSON.parse(s):{ingredients:[],rawIngredients:[],recipes:[]};}catch{return{ingredients:[],rawIngredients:[],recipes:[]};}}
+function saveDB(){localStorage.setItem(DBKEY,JSON.stringify(DB));}
+let DB = loadDB();
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let _tt;
+function toast(msg,type="s"){const el=document.getElementById("toast");el.textContent=msg;el.className=`toast t${type}`;el.style.display="block";clearTimeout(_tt);_tt=setTimeout(()=>el.style.display="none",4500);}
+
+// ── API Key modal ─────────────────────────────────────────────────────────────
+function showKeyModal(){} // key managed server-side on cloud
+async function checkKeyStatus(){}
+
+// ── Claude proxy call ─────────────────────────────────────────────────────────
+async function callClaude(messages, system=""){
+  const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages};
+  if(system) body.system=system;
+  const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(!r.ok||d.error) throw new Error(d.error||"API error "+r.status);
+  return d.content?.map(b=>b.text||"").join("")||"";
+}
+
+async function scanLabel(b64){
+  const sys=`You are a nutrition label reader. Return ONLY a raw JSON object, no markdown:\n{"productName":string,"servingSize":string,"caloriesPerServing":number,"protein":number,"carbs":number,"fat":number,"fiber":number|null,"ingredients":string}`;
+  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
+  try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
+}
+
+async function lookupCalories(items){
+  const sys=`Return ONLY a raw JSON array, no markdown:\n[{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number}]\nUse USDA values.`;
+  const t=await callClaude([{role:"user",content:`Nutrition for: ${JSON.stringify(items)}`}],sys);
+  try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return[];}
+}
+
+// ── Router ────────────────────────────────────────────────────────────────────
+let TAB="dashboard";
+const TABS=[["dashboard","Overview"],["scan","Scan Label"],["raw","Raw Ingredients"],["recipes","Recipes"]];
+function navigate(tab){TAB=tab;render();}
+function render(){
+  document.getElementById("nav").innerHTML=TABS.map(([id,lbl])=>`<button class="nb${TAB===id?" on":""}" onclick="navigate('${id}')">${lbl}</button>`).join("");
+  const pg=document.getElementById("page");
+  if(TAB==="dashboard") pg.innerHTML=dashHTML();
+  else if(TAB==="scan") renderScan();
+  else if(TAB==="raw") renderRaw();
+  else if(TAB==="recipes") renderRecipes();
+  bindAfterRender();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function allIngs(){
+  return[
+    ...DB.ingredients.map(i=>({id:String(i.id),label:i.productName,cal:i.caloriesPerServing,pro:i.protein,carb:i.carbs,fat:i.fat})),
+    ...DB.rawIngredients.map(i=>({id:String(i.id),label:`${i.name} (${i.quantity}${i.unit})`,cal:i.caloriesTotal,pro:i.proteinTotal,carb:i.carbsTotal,fat:i.fatTotal})),
+  ];
+}
+function calcTotals(ings,qty=1){
+  const lib=allIngs();let cal=0,pro=0,carb=0,fat=0;
+  ings.forEach(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return;cal+=ing.cal*ri.qty*qty;pro+=(ing.pro||0)*ri.qty*qty;carb+=(ing.carb||0)*ri.qty*qty;fat+=(ing.fat||0)*ri.qty*qty;});
+  return{cal:Math.round(cal),pro:pro.toFixed(1),carb:carb.toFixed(1),fat:fat.toFixed(1)};
+}
+function pillsHTML(items){
+  return`<div class="mrow">${items.map(([l,v,u])=>`<div class="mpill"><div class="mpv">${v??"-"}${v!=null?u:""}</div><div class="mpl">${l}</div></div>`).join("")}</div>`;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function dashHTML(){
+  const top=[...DB.rawIngredients,...DB.ingredients.map(i=>({...i,name:i.productName,caloriesTotal:i.caloriesPerServing}))].sort((a,b)=>b.caloriesTotal-a.caloriesTotal).slice(0,5);
+  const recent=[...DB.recipes].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,3);
+  return`<h2 class="h1">Dashboard</h2>
+  <p class="sub">Your personal calorie tracking hub. All data is saved locally in your browser.</p>
+  <div class="stats">
+    ${[["Packaged Goods",DB.ingredients.length],["Raw Ingredients",DB.rawIngredients.length],["Recipes",DB.recipes.length],["Library Items",DB.ingredients.length+DB.rawIngredients.length]].map(([l,v])=>`<div class="stat"><div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`).join("")}
+  </div>
+  ${top.length?`<div class="card"><div class="ct">Top Calorie Ingredients</div>${top.map((i,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor);font-size:12px"><span><span style="color:var(--mut);font-size:10px;margin-right:8px">${idx+1}</span>${i.name||i.productName}</span><span class="bdg bgg">${Math.round(i.caloriesTotal)} kcal</span></div>`).join("")}</div>`:""}
+  ${recent.length?`<div class="card"><div class="ct">Recent Recipes</div>${recent.map(r=>{const t=calcTotals(r.ingredients);return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor);font-size:12px;cursor:pointer" onclick="openRecipe('${r.id}')"><span style="font-weight:500">${r.name}</span><span class="bdg bgg">${t.cal} kcal</span></div>`;}).join("")}</div>`:""}
+  <div class="card"><div class="ct">Quick Start</div>
+    ${[["📷","Scan Label","Camera or photo of any packaged product — AI reads the label","scan"],["🥦","Raw Ingredients","Enter foods like '100g oats' to look up USDA calories","raw"],["🍳","Build a Recipe","Combine saved ingredients with serving size control","recipes"]].map(([ic,t,d,tab])=>`
+    <div onclick="navigate('${tab}')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--bor);cursor:pointer;margin-bottom:8px;transition:border-color .2s" onmouseenter="this.style.borderColor='var(--acc)'" onmouseleave="this.style.borderColor='var(--bor)'">
+      <span style="font-size:22px">${ic}</span><div><div style="font-size:12px;font-weight:500;color:var(--txt)">${t}</div><div style="font-size:11px;color:var(--mut);margin-top:2px">${d}</div></div><span style="margin-left:auto;color:var(--mut)">→</span>
+    </div>`).join("")}
+  </div>`;
+}
+
+// ── Scan ──────────────────────────────────────────────────────────────────────
+let camStream=null, scanCaptured=null, scanResult=null;
+
+function renderScan(){
+  document.getElementById("page").innerHTML=`
+  <h2 class="h1">Scan Nutrition Label</h2>
+  <p class="sub">Use your live camera or upload a photo of any packaged product label. AI extracts all nutrition info automatically.</p>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Camera / Upload</div>
+      <div class="cambox" id="cambox" onclick="camboxClick()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <video id="camvid" autoplay playsinline muted style="display:none;width:100%;height:100%;object-fit:cover"></video>
+        <canvas id="camcanvas" style="display:none"></canvas>
+        <img id="camimg" style="display:none;width:100%;height:100%;object-fit:cover" alt="label"/>
+        <div id="camhint" class="camhint">
+          <div style="font-size:36px;margin-bottom:10px">📷</div>
+          <strong style="color:var(--txt);font-size:13px">Click to upload a photo</strong><br/>
+          or drag &amp; drop an image here<br/>
+          <span style="font-size:10px;margin-top:8px;display:block;color:var(--mut)">JPG · PNG · HEIC · taken with any camera</span>
+        </div>
+      </div>
+      <canvas id="camcanvas" style="display:none"></canvas>
+      <input type="file" id="fileinput" accept="image/*" style="display:none" onchange="handleFileInput(this)"/>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap" id="cambuts">
+        <button class="btn bp" onclick="startCam()">▶ Live Camera</button>
+        <button class="btn bs" onclick="document.getElementById('fileinput').click()">↑ Upload Photo</button>
+      </div>
+      <div id="camerr" style="display:none" class="errbox"></div>
+      <div id="scanld" style="display:none" class="ld"><div class="spin"></div>Analyzing label with AI…</div>
+    </div>
+    <div class="card">
+      <div class="ct">Extracted Info</div>
+      <div id="scanresult"><div class="empty">Scan or upload a photo<br/>to extract nutrition info</div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:4px">
+    <div class="ct">Packaged Ingredient Library (${DB.ingredients.length})</div>
+    ${DB.ingredients.length===0?`<div class="empty">No packaged ingredients yet.<br/>Scan a label above to get started.</div>`:`
+    <table class="tbl"><thead><tr><th>Product</th><th>Serving</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
+      ${DB.ingredients.map(i=>`<tr><td style="font-weight:500">${i.productName}</td><td style="color:var(--mut)">${i.servingSize}</td><td><span class="bdg bgg">${i.caloriesPerServing} kcal</span></td><td>${i.protein}g</td><td>${i.carbs}g</td><td>${i.fat}g</td><td><button class="btn br sm" onclick="delIng('${i.id}')">✕</button></td></tr>`).join("")}
+    </tbody></table>`}
+  </div>`;
+  if(scanCaptured) restoreScanImage();
+  if(scanResult) showScanResult(scanResult);
+}
+
+function camboxClick(){if(!scanCaptured&&!camStream) document.getElementById("fileinput").click();}
+
+function handleDrop(e){
+  e.preventDefault(); document.getElementById("cambox").classList.remove("drag");
+  const f=e.dataTransfer.files[0]; if(!f||!f.type.startsWith("image/")) return;
+  readFile(f);
+}
+function handleFileInput(inp){const f=inp.files[0];if(f) readFile(f);}
+function readFile(f){const r=new FileReader();r.onload=ev=>showCaptured(ev.target.result);r.readAsDataURL(f);}
+
+async function startCam(){
+  const errEl=document.getElementById("camerr");
+  errEl.style.display="none";
+  if(!navigator.mediaDevices?.getUserMedia){errEl.textContent="⚠ Camera API not available. Use Upload Photo instead.";errEl.style.display="block";return;}
+  try{
+    if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+    let stream;
+    try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment",width:{ideal:1920}}});}
+    catch{stream=await navigator.mediaDevices.getUserMedia({video:true});}
+    camStream=stream;
+    const vid=document.getElementById("camvid"),hint=document.getElementById("camhint"),img=document.getElementById("camimg");
+    vid.srcObject=stream;vid.style.display="block";hint.style.display="none";img.style.display="none";
+    await vid.play();
+    document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="captureFrame()">📸 Capture</button><button class="btn bs" onclick="stopCam()">✕ Stop</button>`;
+    scanCaptured=null;scanResult=null;
+    document.getElementById("scanresult").innerHTML=`<div class="empty">Point at the label<br/>then click Capture</div>`;
+  }catch(err){
+    errEl.textContent=err.name==="NotAllowedError"?"⚠ Camera permission denied. Check your browser's address bar for a blocked camera icon.":err.name==="NotFoundError"?"⚠ No camera found. Use Upload Photo instead.":`⚠ Camera error: ${err.message}`;
+    errEl.style.display="block";
+  }
+}
+
+function stopCam(){
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  const vid=document.getElementById("camvid"),hint=document.getElementById("camhint");
+  if(vid){vid.style.display="none";vid.srcObject=null;}if(hint)hint.style.display="flex";
+  document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="startCam()">▶ Live Camera</button><button class="btn bs" onclick="document.getElementById('fileinput').click()">↑ Upload Photo</button>`;
+}
+
+function captureFrame(){
+  const vid=document.getElementById("camvid"),canvas=document.createElement("canvas");
+  canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
+  canvas.getContext("2d").drawImage(vid,0,0);
+  const dataUrl=canvas.toDataURL("image/jpeg",0.92);
+  stopCam();showCaptured(dataUrl);
+}
+
+function showCaptured(dataUrl){
+  scanCaptured=dataUrl;scanResult=null;
+  const img=document.getElementById("camimg"),hint=document.getElementById("camhint");
+  if(img){img.src=dataUrl;img.style.display="block";}if(hint)hint.style.display="none";
+  document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="analyzeLabel()">✦ Analyze Label</button><button class="btn bs" onclick="resetScan()">✕ Remove</button>`;
+  document.getElementById("scanresult").innerHTML=`<div class="empty">Click <strong style="color:var(--acc)">Analyze Label</strong><br/>to extract nutrition info</div>`;
+}
+
+function restoreScanImage(){
+  const img=document.getElementById("camimg"),hint=document.getElementById("camhint");
+  if(img){img.src=scanCaptured;img.style.display="block";}if(hint)hint.style.display="none";
+  document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="analyzeLabel()">✦ Analyze Label</button><button class="btn bs" onclick="resetScan()">✕ Remove</button>`;
+}
+
+async function analyzeLabel(){
+  if(!scanCaptured) return;
+  const ld=document.getElementById("scanld");ld.style.display="flex";
+  document.getElementById("scanresult").innerHTML="";
+  try{
+    const info=await scanLabel(scanCaptured.split(",")[1]);
+    ld.style.display="none";
+    if(!info){document.getElementById("scanresult").innerHTML=`<div class="errbox">Could not parse label. Try a clearer, well-lit photo with the full nutrition panel visible.</div>`;return;}
+    scanResult=info;showScanResult(info);
+  }catch(err){
+    ld.style.display="none";
+    document.getElementById("scanresult").innerHTML=`<div class="errbox"><strong style="color:var(--red)">Error:</strong> ${err.message}</div>`;
+    if(err.message.includes("No API key")){setTimeout(showKeyModal,300);}
+  }
+}
+
+function showScanResult(info){
+  document.getElementById("scanresult").innerHTML=`
+  <div style="margin-bottom:14px">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--acc);margin-bottom:6px">Save as name</div>
+    <input id="savename" class="inp" value="${info.productName}" style="font-size:14px;font-weight:500;color:var(--txt)" placeholder="Product name…"/>
+    <div style="font-size:11px;color:var(--mut);margin-top:6px">Per serving: ${info.servingSize}</div>
+  </div>
+  <div class="hero" style="padding:14px;margin-bottom:12px">
+    <div class="hv" style="font-size:38px">${info.caloriesPerServing}</div>
+    <div class="hl">kcal per serving</div>
+  </div>
+  ${pillsHTML([["Protein",info.protein,"g"],["Carbs",info.carbs,"g"],["Fat",info.fat,"g"],["Fiber",info.fiber,"g"]])}
+  ${info.ingredients?`<div style="margin-top:10px;font-size:10px;color:var(--mut);line-height:1.6"><strong style="color:var(--txt)">Ingredients:</strong> ${info.ingredients}</div>`:""}
+  <button class="btn bp" style="margin-top:14px;width:100%" onclick="savePackaged()">+ Save to Library</button>`;
+  // Focus and select all text so user can type immediately
+  setTimeout(()=>{const el=document.getElementById("savename");if(el){el.focus();el.select();}},50);
+}
+
+function savePackaged(){
+  if(!scanResult) return;
+  const customName = (document.getElementById("savename")?.value||"").trim() || scanResult.productName;
+  DB.ingredients.push({...scanResult, productName:customName, id:Date.now(), addedAt:new Date().toISOString(), type:"packaged"});
+  saveDB();toast(`✓ Saved: ${customName}`);
+  scanResult=null;scanCaptured=null;render();
+}
+function resetScan(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}scanCaptured=null;scanResult=null;render();}
+function delIng(id){DB.ingredients=DB.ingredients.filter(i=>String(i.id)!==id);saveDB();render();}
+
+// ── Raw Ingredients ───────────────────────────────────────────────────────────
+const UNITS=["g","kg","ml","l","cup","tbsp","tsp","piece","oz"];
+let rawRows=[{name:"",qty:"",unit:"g"}];
+
+function renderRaw(){
+  document.getElementById("page").innerHTML=`
+  <h2 class="h1">Raw Ingredients</h2>
+  <p class="sub">Enter any food with a quantity — AI looks up calorie and macro data from USDA nutrition databases.</p>
+  <div class="card"><div class="ct">Add Ingredients</div>
+    <div id="rawrows">${rawRows.map(rawRowHTML).join("")}</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn bs" onclick="addRawRow()">+ Add Row</button>
+      <button class="btn bp" id="lookupbtn" onclick="doLookup()">✦ Find Calories</button>
+    </div>
+    <div id="rawld" style="display:none" class="ld"><div class="spin"></div>Querying nutrition database…</div>
+  </div>
+  <div class="card"><div class="ct">Raw Ingredient Library (${DB.rawIngredients.length})</div>
+    ${DB.rawIngredients.length===0?`<div class="empty">No raw ingredients yet.<br/>Enter some foods above to get started.</div>`:`
+    <table class="tbl"><thead><tr><th>Ingredient</th><th>Qty</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
+      ${DB.rawIngredients.map(i=>`<tr><td style="text-transform:capitalize;font-weight:500">${i.name}</td><td style="color:var(--mut)">${i.quantity}${i.unit}</td><td><span class="bdg bgb">${Math.round(i.caloriesTotal)} kcal</span></td><td>${(i.proteinTotal||0).toFixed(1)}g</td><td>${(i.carbsTotal||0).toFixed(1)}g</td><td>${(i.fatTotal||0).toFixed(1)}g</td><td><button class="btn br sm" onclick="delRaw('${i.id}')">✕</button></td></tr>`).join("")}
+    </tbody></table>`}
+  </div>`;
+}
+
+function rawRowHTML(r,i){
+  return`<div class="ig" id="rr${i}">
+    <input class="inp" style="flex:2" placeholder="apple, oats, chicken…" value="${r.name}" oninput="rawRows[${i}].name=this.value"/>
+    <input class="inp" style="flex:1;max-width:85px" type="number" placeholder="100" value="${r.qty}" oninput="rawRows[${i}].qty=this.value"/>
+    <select class="inp" style="flex:1;max-width:85px" onchange="rawRows[${i}].unit=this.value">
+      ${UNITS.map(u=>`<option${u===r.unit?" selected":""}>${u}</option>`).join("")}
+    </select>
+    ${rawRows.length>1?`<button class="btn br sm" onclick="rawRows.splice(${i},1);renderRaw()">✕</button>`:""}
+  </div>`;
+}
+
+function addRawRow(){rawRows.push({name:"",qty:"",unit:"g"});renderRaw();}
+
+async function doLookup(){
+  const valid=rawRows.filter(r=>r.name.trim()&&r.qty);
+  if(!valid.length){toast("Add at least one ingredient with a name and quantity.","e");return;}
+  document.getElementById("lookupbtn").disabled=true;
+  document.getElementById("rawld").style.display="flex";
+  try{
+    const res=await lookupCalories(valid.map(r=>({name:r.name.trim(),quantity:parseFloat(r.qty),unit:r.unit})));
+    res.forEach(r=>DB.rawIngredients.push({...r,id:Date.now()+Math.random(),addedAt:new Date().toISOString(),type:"raw"}));
+    saveDB();toast(`✓ Added ${res.length} ingredient${res.length>1?"s":""}`);
+    rawRows=[{name:"",qty:"",unit:"g"}];renderRaw();
+  }catch(err){
+    toast("Error: "+(err.message||"unknown"),"e");
+    if(err.message.includes("No API key")) setTimeout(showKeyModal,300);
+  }
+  const ld=document.getElementById("rawld");if(ld)ld.style.display="none";
+  const lb=document.getElementById("lookupbtn");if(lb)lb.disabled=false;
+}
+
+function delRaw(id){DB.rawIngredients=DB.rawIngredients.filter(i=>String(i.id)!==String(id));saveDB();renderRaw();}
+
+// ── Recipes ───────────────────────────────────────────────────────────────────
+let recMode="list",curRecId=null,recServings=1,recIng=[],recName="",recDesc="";
+
+function openRecipe(id){curRecId=String(id);recMode="view";recServings=1;TAB="recipes";render();}
+
+function renderRecipes(){
+  if(recMode==="view"&&curRecId){renderRecView();return;}
+  if(recMode==="create"){renderRecCreate();return;}
+  document.getElementById("page").innerHTML=`
+  <h2 class="h1">Recipes</h2>
+  <p class="sub">Build recipes from your saved ingredients. Tap any recipe to open it and adjust serving size.</p>
+  <button class="btn bp" style="margin-bottom:20px" onclick="startCreate()">+ Create Recipe</button>
+  ${DB.recipes.length===0?`<div class="empty card">No recipes yet.<br/>Create your first recipe above.</div>`:
+  DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
+  <div class="rec-card" onclick="openRecipe('${rec.id}')">
+    <div style="flex:1"><div style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px">${rec.name}</div>
+    ${rec.description?`<div style="font-size:11px;color:var(--mut)">${rec.description}</div>`:""}
+    <div style="font-size:11px;color:var(--mut);margin-top:4px">${rec.ingredients.length} ingredient${rec.ingredients.length!==1?"s":""} · ${t.pro}g protein · ${t.carb}g carbs</div></div>
+    <div style="text-align:right;flex-shrink:0;margin-left:16px"><div style="font-family:'Playfair Display',serif;font-size:26px;color:var(--acc)">${t.cal}</div><div style="font-size:9px;color:var(--mut);text-transform:uppercase">kcal</div></div>
+    <button class="btn br sm" style="margin-left:12px" onclick="event.stopPropagation();delRecipe('${rec.id}')">✕</button>
+  </div>`;}).join("")}`;
+}
+
+function renderRecView(){
+  const rec=DB.recipes.find(r=>String(r.id)===curRecId);
+  if(!rec){recMode="list";renderRecipes();return;}
+  const tot=calcTotals(rec.ingredients,recServings),ps=calcTotals(rec.ingredients,1),lib=allIngs();
+  document.getElementById("page").innerHTML=`
+  <button class="btn bs sm" onclick="recMode='list';render()" style="margin-bottom:20px">← Back</button>
+  <h2 class="h1">${rec.name}</h2>${rec.description?`<p class="sub">${rec.description}</p>`:""}
+  <div class="hero">
+    <div class="hv">${tot.cal}</div>
+    <div class="hl">kcal for ${recServings} serving${recServings>1?"s":""}</div>
+    <div class="srow" style="max-width:400px;margin:16px auto 0">
+      <label>Servings</label>
+      <input type="range" min=".5" max="10" step=".5" value="${recServings}" id="servslider" oninput="recServings=+this.value;renderRecipes()"/>
+      <span class="val">${recServings}×</span>
+    </div>
+  </div>
+  ${pillsHTML([["Calories",tot.cal,"kcal"],["Protein",tot.pro,"g"],["Carbs",tot.carb,"g"],["Fat",tot.fat,"g"]])}
+  <div class="card" style="margin-top:16px"><div class="ct">Ingredients breakdown</div>
+    ${rec.ingredients.map(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return"";const pct=tot.cal>0?Math.round(ing.cal*ri.qty*recServings/tot.cal*100):0;
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bor);font-size:12px">
+      <div><div style="font-weight:500">${ri.qty}× ${ing.label}</div><div style="color:var(--mut);font-size:10px;margin-top:2px">${pct}% of total</div></div>
+      <span style="color:var(--acc);font-weight:500">${Math.round(ing.cal*ri.qty*recServings)} kcal</span></div>`;}).join("")}
+    <div style="margin-top:12px;font-size:11px;color:var(--mut);padding-top:10px;border-top:1px solid var(--bor)">Per 1 serving: <strong style="color:var(--txt)">${ps.cal} kcal</strong> · ${ps.pro}g protein · ${ps.carb}g carbs · ${ps.fat}g fat</div>
+  </div>`;
+}
+
+function startCreate(){recMode="create";recName="";recDesc="";recIng=[{ingredientId:"",qty:1}];renderRecipes();}
+
+function renderRecCreate(){
+  const lib=allIngs();
+  const opts=`<option value="">Select ingredient…</option>
+    ${DB.ingredients.length?`<optgroup label="📦 Packaged Goods">${DB.ingredients.map(i=>`<option value="${i.id}">${i.productName} · ${i.caloriesPerServing} kcal/serving</option>`).join("")}</optgroup>`:""}
+    ${DB.rawIngredients.length?`<optgroup label="🥦 Raw Ingredients">${DB.rawIngredients.map(i=>`<option value="${i.id}">${i.name} ${i.quantity}${i.unit} · ${Math.round(i.caloriesTotal)} kcal</option>`).join("")}</optgroup>`:""}`;
+  const prev=calcTotals(recIng.filter(r=>r.ingredientId));
+  document.getElementById("page").innerHTML=`
+  <button class="btn bs sm" onclick="recMode='list';render()" style="margin-bottom:20px">← Cancel</button>
+  <h2 class="h1">New Recipe</h2>
+  <p class="sub">Combine ingredients from your library. Set quantities and see a live calorie preview.</p>
+  <div class="card"><div class="ct">Recipe Details</div>
+    <input class="inp" id="rname" placeholder="Recipe name (e.g. Protein Oat Bowl)" value="${recName}" oninput="recName=this.value" style="margin-bottom:10px"/>
+    <input class="inp" id="rdesc" placeholder="Description (optional)" value="${recDesc}" oninput="recDesc=this.value"/>
+  </div>
+  <div class="card"><div class="ct">Ingredients</div>
+    ${!lib.length?`<div class="empty">Your library is empty.<br/>Add ingredients in the Scan or Raw Ingredients tabs first.</div>`:""}
+    <div id="recings">
+      ${recIng.map((ri,i)=>`<div class="rir">
+        <select class="inp" style="flex:3" data-idx="${i}" onchange="recIng[${i}].ingredientId=this.value;rerenderRecPreview()">${opts}</select>
+        <input class="inp" type="number" min=".1" step=".1" style="flex:1;max-width:75px" value="${ri.qty}" oninput="recIng[${i}].qty=+this.value;rerenderRecPreview()"/>
+        <span style="font-size:10px;color:var(--mut)">×</span>
+        <button class="btn br sm" onclick="recIng.splice(${i},1);renderRecipes()">✕</button>
+      </div>`).join("")}
+    </div>
+    <button class="btn bs" style="margin-top:12px" onclick="recIng.push({ingredientId:'',qty:1});renderRecipes()">+ Add Ingredient</button>
+  </div>
+  <div id="recpreview">${recIng.some(r=>r.ingredientId)?`<div class="hero"><div class="hv">${prev.cal}</div><div class="hl">kcal · ${prev.pro}g protein · ${prev.carb}g carbs · ${prev.fat}g fat</div></div>`:""}</div>
+  <button class="btn bp" style="width:100%;justify-content:center;font-size:13px;margin-top:4px" onclick="saveRecipe()">Save Recipe</button>`;
+  // Restore select values
+  document.querySelectorAll("#recings select").forEach((sel,i)=>{if(recIng[i]?.ingredientId)sel.value=recIng[i].ingredientId;});
+}
+
+function rerenderRecPreview(){
+  const prev=calcTotals(recIng.filter(r=>r.ingredientId));
+  const el=document.getElementById("recpreview");
+  if(el) el.innerHTML=recIng.some(r=>r.ingredientId)?`<div class="hero"><div class="hv">${prev.cal}</div><div class="hl">kcal · ${prev.pro}g protein · ${prev.carb}g carbs · ${prev.fat}g fat</div></div>`:"";
+}
+
+function saveRecipe(){
+  recName=document.getElementById("rname")?.value.trim()||recName;
+  recDesc=document.getElementById("rdesc")?.value.trim()||recDesc;
+  if(!recName){toast("Enter a recipe name.","e");return;}
+  const valid=recIng.filter(r=>r.ingredientId&&r.qty>0);
+  if(!valid.length){toast("Add at least one ingredient.","e");return;}
+  DB.recipes.push({id:Date.now(),name:recName,description:recDesc,ingredients:valid,createdAt:new Date().toISOString()});
+  saveDB();toast(`✓ Recipe saved: ${recName}`);recMode="list";render();
+}
+
+function delRecipe(id){
+  if(!confirm("Delete this recipe?")) return;
+  DB.recipes=DB.recipes.filter(r=>String(r.id)!==String(id));saveDB();toast("Recipe deleted.");render();
+}
+
+// ── After-render hooks ────────────────────────────────────────────────────────
+function bindAfterRender(){
+  if(recMode==="create"){
+    document.querySelectorAll("#recings select").forEach((sel,i)=>{if(recIng[i]?.ingredientId)sel.value=recIng[i].ingredientId;});
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+render();
+checkKeyStatus();
+</script>
+</body>
+</html>
