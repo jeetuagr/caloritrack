@@ -1,0 +1,63 @@
+# CaloriTrack — Cloud Deployment
+
+## Deploy to Railway (recommended, free tier available)
+
+### Step 1 — Push to GitHub
+1. Create a free account at github.com
+2. Create a new repository called "caloritrack"
+3. Upload all files from this folder to the repo:
+   - server.py
+   - Procfile
+   - requirements.txt
+   - runtime.txt
+   - static/index.html
+   - .gitignore
+
+   Easiest way: github.com/new → create repo → "uploading an existing file" link
+
+### Step 2 — Deploy on Railway
+1. Go to railway.app → sign up with GitHub
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Select your "caloritrack" repo
+4. Railway detects Python automatically and deploys
+
+### Step 3 — Set your API key
+1. In Railway dashboard → click your project → "Variables" tab
+2. Add variable:
+   - Name:  ANTHROPIC_API_KEY
+   - Value: sk-ant-... (your full key)
+3. Click "Add" → Railway redeploys automatically
+
+### Step 4 — Get your URL
+Railway gives you a URL like:
+  https://caloritrack-production.up.railway.app
+
+Open it on any device — phone, tablet, laptop. Camera works on all of them.
+
+---
+
+## Deploy to Render (alternative, also free)
+
+Same steps but at render.com:
+1. New → Web Service → Connect GitHub repo
+2. Build Command: (leave empty)
+3. Start Command: python3 server.py
+4. Add ANTHROPIC_API_KEY in Environment tab
+
+---
+
+## Deploy to AWS (advanced)
+
+Use Elastic Beanstalk:
+1. Install EB CLI: pip install awsebcli
+2. eb init → eb create → eb deploy
+3. Set env var: eb setenv ANTHROPIC_API_KEY=sk-ant-...
+
+---
+
+## Notes
+
+- The API key is stored securely as a server environment variable
+- Users of your app do NOT need their own API key — you pay for all usage
+- Anthropic API costs are tiny — label scanning ~$0.01 per scan
+- All user data (ingredients, recipes) stored in each user's browser localStorage
