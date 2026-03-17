@@ -7,7 +7,7 @@
 <!-- PWA / iOS metadata -->
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="CaloriTrack"/>
 <meta name="theme-color" content="#0d0f0a"/>
 <meta name="description" content="Personal calorie and nutrition tracker"/>
@@ -51,7 +51,7 @@
 html{overflow-x:hidden;overflow-y:scroll}body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-x:none;overflow-x:hidden;width:100%;position:relative}
 .app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;overflow-x:hidden;width:100%}
 /* iOS safe areas */
-.hdr{padding:14px 24px;padding-top:max(14px,env(safe-area-inset-top));padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100;-webkit-backdrop-filter:none}
+.hdr{padding-top:calc(env(safe-area-inset-top) + 12px);padding-bottom:12px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
 .logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--acc);letter-spacing:-.5px;flex-shrink:0}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:3px;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--bor);overflow-x:auto;flex:1;max-width:600px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -75,11 +75,11 @@ html{overflow-x:hidden;overflow-y:scroll}body{background:var(--bg);color:var(--t
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .inp{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:'DM Mono',monospace;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--acc)}
-.ig{display:flex;gap:6px;margin-bottom:10px;flex-wrap:nowrap;min-width:0}.ig .inp{flex:1;min-width:0}
+.ig{display:flex;gap:5px;margin-bottom:10px;flex-wrap:nowrap;min-width:0;width:100%}.ig .inp{flex:1;min-width:0;width:0}
 select.inp{cursor:pointer;font-size:16px}
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}.tbl{border-collapse:collapse;min-width:500px;width:max-content}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;display:block;position:relative}.tbl{border-collapse:collapse;table-layout:fixed}.tbl thead th:nth-child(1){min-width:120px;width:30%}.tbl thead th:nth-child(2){min-width:70px;width:15%}.tbl thead th:nth-child(3){min-width:80px;width:16%}.tbl thead th:nth-child(4),.tbl thead th:nth-child(5),.tbl thead th:nth-child(6){min-width:55px;width:12%}.tbl thead th:last-child{min-width:36px;width:9%}
 .tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);padding:8px 10px;border-bottom:1px solid var(--bor)}
-.tbl td{padding:9px 10px;border-bottom:1px solid var(--bor);font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl td{padding:8px 8px;border-bottom:1px solid var(--bor);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tbl th{padding:8px 8px}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:var(--sur)}
 .bdg{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
@@ -271,9 +271,9 @@ function renderScan(){
   <div class="card" style="margin-top:4px">
     <div class="ct">Packaged Ingredient Library (${DB.ingredients.length})</div>
     ${DB.ingredients.length===0?`<div class="empty">No packaged ingredients yet.<br/>Scan a label above to get started.</div>`:`
-    <div class="tbl-wrap"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Product</th><th>Serving</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Product</th><th>Serving</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
       ${DB.ingredients.map(i=>`<tr><td style="font-weight:500">${i.productName}</td><td style="color:var(--mut)">${i.servingSize}</td><td><span class="bdg bgg">${i.caloriesPerServing} kcal</span></td><td>${i.protein}g</td><td>${i.carbs}g</td><td>${i.fat}g</td><td><button class="btn br sm" onclick="delIng('${i.id}')">✕</button></td></tr>`).join("")}
-    </tbody></table></div></div>`}
+    </tbody></table></div>`}
   </div>`;
   if(scanCaptured) restoreScanImage();
   if(scanResult) showScanResult(scanResult);
@@ -411,8 +411,8 @@ function renderRaw(){
 function rawRowHTML(r,i){
   return`<div class="ig" id="rr${i}">
     <input class="inp" style="flex:2" placeholder="apple, oats, chicken…" value="${r.name}" oninput="rawRows[${i}].name=this.value"/>
-    <input class="inp" style="flex:1;max-width:85px" type="number" placeholder="100" value="${r.qty}" oninput="rawRows[${i}].qty=this.value"/>
-    <select class="inp" style="flex:1;max-width:85px" onchange="rawRows[${i}].unit=this.value">
+    <input class="inp" style="flex:0 0 60px;width:60px" type="number" placeholder="100" value="${r.qty}" oninput="rawRows[${i}].qty=this.value"/>
+    <select class="inp" style="flex:0 0 65px;width:65px" onchange="rawRows[${i}].unit=this.value">
       ${UNITS.map(u=>`<option${u===r.unit?" selected":""}>${u}</option>`).join("")}
     </select>
     ${rawRows.length>1?`<button class="btn br sm" onclick="rawRows.splice(${i},1);renderRaw()">✕</button>`:""}
