@@ -306,9 +306,10 @@ async function analyzeLabel(){
 
 function showScanResult(info){
   document.getElementById("scanresult").innerHTML=`
-  <div style="margin-bottom:12px">
-    <div style="font-size:16px;color:var(--acc);font-family:'Playfair Display',serif;margin-bottom:4px">${info.productName}</div>
-    <div style="font-size:11px;color:var(--mut)">Per serving: ${info.servingSize}</div>
+  <div style="margin-bottom:14px">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--acc);margin-bottom:6px">Save as name</div>
+    <input id="savename" class="inp" value="${info.productName}" style="font-size:14px;font-weight:500;color:var(--txt)" placeholder="Product name…"/>
+    <div style="font-size:11px;color:var(--mut);margin-top:6px">Per serving: ${info.servingSize}</div>
   </div>
   <div class="hero" style="padding:14px;margin-bottom:12px">
     <div class="hv" style="font-size:38px">${info.caloriesPerServing}</div>
@@ -317,12 +318,15 @@ function showScanResult(info){
   ${pillsHTML([["Protein",info.protein,"g"],["Carbs",info.carbs,"g"],["Fat",info.fat,"g"],["Fiber",info.fiber,"g"]])}
   ${info.ingredients?`<div style="margin-top:10px;font-size:10px;color:var(--mut);line-height:1.6"><strong style="color:var(--txt)">Ingredients:</strong> ${info.ingredients}</div>`:""}
   <button class="btn bp" style="margin-top:14px;width:100%" onclick="savePackaged()">+ Save to Library</button>`;
+  // Focus and select all text so user can type immediately
+  setTimeout(()=>{const el=document.getElementById("savename");if(el){el.focus();el.select();}},50);
 }
 
 function savePackaged(){
   if(!scanResult) return;
-  DB.ingredients.push({...scanResult,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"});
-  saveDB();toast(`✓ Saved: ${scanResult.productName}`);
+  const customName = (document.getElementById("savename")?.value||"").trim() || scanResult.productName;
+  DB.ingredients.push({...scanResult, productName:customName, id:Date.now(), addedAt:new Date().toISOString(), type:"packaged"});
+  saveDB();toast(`✓ Saved: ${customName}`);
   scanResult=null;scanCaptured=null;render();
 }
 function resetScan(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}scanCaptured=null;scanResult=null;render();}

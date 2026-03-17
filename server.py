@@ -58,8 +58,12 @@ class Handler(BaseHTTPRequestHandler):
                 "has_key": bool(key),
                 "key_preview": ("sk-ant-..." + key[-4:]) if key else ""
             })
-        else:
+        elif path.startswith("/api/"):
             self.send_json({"error": "not found"}, 404)
+        else:
+            # All non-API unknown routes serve index.html (SPA fallback)
+            f = STATIC / "index.html"
+            self.send_file(f, "text/html; charset=utf-8")
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
@@ -90,8 +94,12 @@ class Handler(BaseHTTPRequestHandler):
                 with urllib.request.urlopen(req, timeout=60) as resp:
                     self.send_json(json.loads(resp.read()))
             except urllib.error.HTTPError as e:
-                err = json.loads(e.read())
-                self.send_json({"error": err.get("error", {}).get("message", str(e))}, e.code)
+                try:
+                    err = json.loads(e.read())
+                    msg = err.get("error", {}).get("message", str(e))
+                except Exception:
+                    msg = f"HTTP {e.code}"
+                self.send_json({"error": msg}, e.code)
             except urllib.error.URLError as e:
                 self.send_json({"error": f"Network error: {e.reason}"}, 503)
             return
