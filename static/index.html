@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 
 <!-- PWA / iOS metadata -->
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <meta name="apple-mobile-web-app-title" content="CaloriTrack"/>
 <meta name="theme-color" content="#0d0f0a"/>
 <meta name="description" content="Personal calorie and nutrition tracker"/>
@@ -48,24 +48,24 @@
   --acc:#b8e04a;--acc2:#4ae0a8;--txt:#e8ead4;--mut:#6b7060;
   --red:#e04a4a;--r:12px;
 }
-body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-.app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+html{overflow-x:hidden;overflow-y:scroll}body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-x:none;overflow-x:hidden;width:100%;position:relative}
+.app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;overflow-x:hidden;width:100%}
 /* iOS safe areas */
-.hdr{padding:14px 24px;padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.hdr{padding:14px 24px;padding-top:max(14px,env(safe-area-inset-top));padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:var(--sur);gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100;-webkit-backdrop-filter:none}
 .logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--acc);letter-spacing:-.5px;flex-shrink:0}
 .logo span{color:var(--txt)}
 .nav{display:flex;gap:3px;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--bor);overflow-x:auto;flex:1;max-width:600px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .nb{padding:7px 13px;border:none;background:transparent;color:var(--mut);font-family:'DM Mono',monospace;font-size:11px;border-radius:7px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;-webkit-touch-callout:none;user-select:none}
-.nb.on{background:var(--acc);color:var(--bg);font-weight:500}
+.nb.on{background:var(--acc);color:var(--bg);font-weight:500}@media(max-width:400px){.nb{padding:6px 9px;font-size:10px;letter-spacing:.3px}}
 .nb:hover:not(.on){color:var(--txt);background:var(--card)}
 
-.pg{flex:1;padding:28px 24px;padding-bottom:max(28px,env(safe-area-inset-bottom));padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));max-width:960px;margin:0 auto;width:100%}
+.pg{flex:1;padding:20px 16px;padding-bottom:max(80px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));max-width:960px;margin:0 auto;width:100%;overflow-x:hidden;box-sizing:border-box}
 .h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--txt);margin-bottom:6px}
 .sub{color:var(--mut);font-size:12px;margin-bottom:24px;line-height:1.7}
-.card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:18px 16px;margin-bottom:14px;overflow:hidden;min-width:0}
 .ct{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--acc);margin-bottom:14px;font-weight:500}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:0}@media(max-width:600px){.g2{grid-template-columns:1fr}}
 .btn{padding:10px 18px;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .15s;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;-webkit-touch-callout:none;user-select:none;touch-action:manipulation}
 .btn:active{transform:scale(0.97);opacity:.85}
 .bp{background:var(--acc);color:var(--bg)}.bp:hover{background:#cdf562}
@@ -75,24 +75,24 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;min-h
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .inp{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:'DM Mono',monospace;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--acc)}
-.ig{display:flex;gap:8px;margin-bottom:10px}.ig .inp{flex:1}
-select.inp{cursor:pointer}
-.tbl{width:100%;border-collapse:collapse}
+.ig{display:flex;gap:6px;margin-bottom:10px;flex-wrap:nowrap;min-width:0}.ig .inp{flex:1;min-width:0}
+select.inp{cursor:pointer;font-size:16px}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}.tbl{border-collapse:collapse;min-width:500px;width:max-content}
 .tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);padding:8px 10px;border-bottom:1px solid var(--bor)}
-.tbl td{padding:9px 10px;border-bottom:1px solid var(--bor);font-size:12px}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--bor);font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:var(--sur)}
 .bdg{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
 .bgg{background:rgba(184,224,74,.15);color:var(--acc)}
 .bgb{background:rgba(74,224,168,.15);color:var(--acc2)}
-.mrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.mpill{flex:1;min-width:75px;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px;text-align:center}
+.mrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;width:100%}
+.mpill{flex:1;min-width:60px;max-width:calc(25% - 6px);background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:8px 4px;text-align:center;box-sizing:border-box}
 .mpv{font-size:17px;color:var(--acc);font-weight:500}
 .mpl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-top:2px}
-.hero{text-align:center;padding:22px 20px;background:linear-gradient(135deg,rgba(184,224,74,.08),rgba(74,224,168,.05));border-radius:10px;border:1px solid rgba(184,224,74,.2);margin-bottom:18px}
-.hv{font-family:'Playfair Display',serif;font-size:54px;color:var(--acc);line-height:1}
+.hero{text-align:center;padding:20px 16px;background:linear-gradient(135deg,rgba(184,224,74,.08),rgba(74,224,168,.05));border-radius:10px;border:1px solid rgba(184,224,74,.2);margin-bottom:16px;width:100%;box-sizing:border-box}
+.hv{font-family:'Playfair Display',serif;font-size:clamp(36px,12vw,54px);color:var(--acc);line-height:1}
 .hl{color:var(--mut);font-size:11px;margin-top:5px;text-transform:uppercase;letter-spacing:1px}
-.srow{display:flex;align-items:center;gap:12px;margin-top:16px}
+.srow{display:flex;align-items:center;gap:10px;margin-top:16px;width:100%;min-width:0}
 .srow label{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
 .srow input[type=range]{flex:1;accent-color:var(--acc)}
 .srow .val{color:var(--acc);font-size:14px;font-weight:500;min-width:36px;text-align:right}
@@ -100,25 +100,25 @@ select.inp{cursor:pointer}
 .spin{width:16px;height:16px;border:2px solid var(--bor);border-top-color:var(--acc);border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:40px;color:var(--mut);font-size:12px;line-height:1.8}
-.cambox{width:100%;aspect-ratio:4/3;max-height:320px;background:var(--bg);border:2px dashed var(--bor);border-radius:10px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
+.cambox{width:100%;aspect-ratio:4/3;max-height:260px;background:var(--bg);border:2px dashed var(--bor);border-radius:10px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s;box-sizing:border-box}
 .cambox.drag{border-color:var(--acc);background:rgba(184,224,74,.04)}
 .cambox video,.cambox img{width:100%;height:100%;object-fit:cover;display:block}
 .camhint{color:var(--mut);font-size:12px;text-align:center;line-height:1.9;pointer-events:none;padding:20px}
-.rir{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor)}
+.rir{display:flex;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor);flex-wrap:wrap;min-width:0}
 .rir:last-child{border-bottom:none}
-.rec-card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s}
+.rec-card{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s;min-width:0;overflow:hidden}
 .rec-card:hover{border-color:var(--acc)}
-.stat{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:16px 18px}
+.stat{background:var(--card);border:1px solid var(--bor);border-radius:var(--r);padding:14px 16px;min-width:0}
 .stat-val{font-family:'Playfair Display',serif;font-size:30px;color:var(--acc);line-height:1}
 .stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin-top:4px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;width:100%}@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;animation:su .3s ease;max-width:340px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,.4)}
 .ts{background:var(--acc);color:var(--bg)}.te{background:var(--red);color:#fff}.ti{background:#1a6b3a;color:#afffcc;border:1px solid #2a9b5a}
 @keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
 .errbox{padding:12px 14px;background:rgba(224,74,74,.08);border:1px solid rgba(224,74,74,.25);border-radius:8px;font-size:11px;color:#f0a0a0;line-height:1.7;margin-top:10px}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
 .modal{background:var(--card);border:1px solid var(--bor);border-radius:16px;padding:32px;max-width:480px;width:100%}
-@media(max-width:640px){.g2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.hdr{flex-direction:column;align-items:stretch}.nav{max-width:100%}}
+@media(max-width:640px){.hdr{flex-wrap:wrap;gap:8px}.nav{max-width:100%;order:2;flex:0 0 100%}.logo{flex-shrink:0}.keybtn{margin-left:auto}}
 </style>
 </head>
 <body>
@@ -227,7 +227,7 @@ function dashHTML(){
   ${recent.length?`<div class="card"><div class="ct">Recent Recipes</div>${recent.map(r=>{const t=calcTotals(r.ingredients);return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bor);font-size:12px;cursor:pointer" onclick="openRecipe('${r.id}')"><span style="font-weight:500">${r.name}</span><span class="bdg bgg">${t.cal} kcal</span></div>`;}).join("")}</div>`:""}
   <div class="card"><div class="ct">Quick Start</div>
     ${[["📷","Scan Label","Camera or photo of any packaged product — AI reads the label","scan"],["🥦","Raw Ingredients","Enter foods like '100g oats' to look up USDA calories","raw"],["🍳","Build a Recipe","Combine saved ingredients with serving size control","recipes"]].map(([ic,t,d,tab])=>`
-    <div onclick="navigate('${tab}')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--bor);cursor:pointer;margin-bottom:8px;transition:border-color .2s" onmouseenter="this.style.borderColor='var(--acc)'" onmouseleave="this.style.borderColor='var(--bor)'">
+    <div onclick="navigate('${tab}')" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--bor);cursor:pointer;margin-bottom:8px;transition:border-color .2s;overflow:hidden;min-width:0" onmouseenter="this.style.borderColor='var(--acc)'" onmouseleave="this.style.borderColor='var(--bor)'">
       <span style="font-size:22px">${ic}</span><div><div style="font-size:12px;font-weight:500;color:var(--txt)">${t}</div><div style="font-size:11px;color:var(--mut);margin-top:2px">${d}</div></div><span style="margin-left:auto;color:var(--mut)">→</span>
     </div>`).join("")}
   </div>`;
@@ -271,9 +271,9 @@ function renderScan(){
   <div class="card" style="margin-top:4px">
     <div class="ct">Packaged Ingredient Library (${DB.ingredients.length})</div>
     ${DB.ingredients.length===0?`<div class="empty">No packaged ingredients yet.<br/>Scan a label above to get started.</div>`:`
-    <table class="tbl"><thead><tr><th>Product</th><th>Serving</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
+    <div class="tbl-wrap"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Product</th><th>Serving</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
       ${DB.ingredients.map(i=>`<tr><td style="font-weight:500">${i.productName}</td><td style="color:var(--mut)">${i.servingSize}</td><td><span class="bdg bgg">${i.caloriesPerServing} kcal</span></td><td>${i.protein}g</td><td>${i.carbs}g</td><td>${i.fat}g</td><td><button class="btn br sm" onclick="delIng('${i.id}')">✕</button></td></tr>`).join("")}
-    </tbody></table>`}
+    </tbody></table></div></div>`}
   </div>`;
   if(scanCaptured) restoreScanImage();
   if(scanResult) showScanResult(scanResult);
@@ -402,9 +402,9 @@ function renderRaw(){
   </div>
   <div class="card"><div class="ct">Raw Ingredient Library (${DB.rawIngredients.length})</div>
     ${DB.rawIngredients.length===0?`<div class="empty">No raw ingredients yet.<br/>Enter some foods above to get started.</div>`:`
-    <table class="tbl"><thead><tr><th>Ingredient</th><th>Qty</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Ingredient</th><th>Qty</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th></th></tr></thead><tbody>
       ${DB.rawIngredients.map(i=>`<tr><td style="text-transform:capitalize;font-weight:500">${i.name}</td><td style="color:var(--mut)">${i.quantity}${i.unit}</td><td><span class="bdg bgb">${Math.round(i.caloriesTotal)} kcal</span></td><td>${(i.proteinTotal||0).toFixed(1)}g</td><td>${(i.carbsTotal||0).toFixed(1)}g</td><td>${(i.fatTotal||0).toFixed(1)}g</td><td><button class="btn br sm" onclick="delRaw('${i.id}')">✕</button></td></tr>`).join("")}
-    </tbody></table>`}
+    </tbody></table></div>`}
   </div>`;
 }
 
@@ -456,7 +456,7 @@ function renderRecipes(){
   ${DB.recipes.length===0?`<div class="empty card">No recipes yet.<br/>Create your first recipe above.</div>`:
   DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
   <div class="rec-card" onclick="openRecipe('${rec.id}')">
-    <div style="flex:1"><div style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px">${rec.name}</div>
+    <div style="flex:1;min-width:0;overflow:hidden"><div style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rec.name}</div>
     ${rec.description?`<div style="font-size:11px;color:var(--mut)">${rec.description}</div>`:""}
     <div style="font-size:11px;color:var(--mut);margin-top:4px">${rec.ingredients.length} ingredient${rec.ingredients.length!==1?"s":""} · ${t.pro}g protein · ${t.carb}g carbs</div></div>
     <div style="text-align:right;flex-shrink:0;margin-left:16px"><div style="font-family:'Playfair Display',serif;font-size:26px;color:var(--acc)">${t.cal}</div><div style="font-size:9px;color:var(--mut);text-transform:uppercase">kcal</div></div>
@@ -483,7 +483,7 @@ function renderRecView(){
   ${pillsHTML([["Calories",tot.cal,"kcal"],["Protein",tot.pro,"g"],["Carbs",tot.carb,"g"],["Fat",tot.fat,"g"]])}
   <div class="card" style="margin-top:16px"><div class="ct">Ingredients breakdown</div>
     ${rec.ingredients.map(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return"";const pct=tot.cal>0?Math.round(ing.cal*ri.qty*recServings/tot.cal*100):0;
-    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bor);font-size:12px">
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bor);font-size:12px;min-width:0;gap:8px">
       <div><div style="font-weight:500">${ri.qty}× ${ing.label}</div><div style="color:var(--mut);font-size:10px;margin-top:2px">${pct}% of total</div></div>
       <span style="color:var(--acc);font-weight:500">${Math.round(ing.cal*ri.qty*recServings)} kcal</span></div>`;}).join("")}
     <div style="margin-top:12px;font-size:11px;color:var(--mut);padding-top:10px;border-top:1px solid var(--bor)">Per 1 serving: <strong style="color:var(--txt)">${ps.cal} kcal</strong> · ${ps.pro}g protein · ${ps.carb}g carbs · ${ps.fat}g fat</div>
@@ -573,7 +573,7 @@ function showInstallBanner(){
   banner.style.cssText = `position:fixed;bottom:0;left:0;right:0;background:#1a1e14;border-top:1px solid #2a2e22;padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));z-index:500;display:flex;align-items:center;gap:12px;animation:su .3s ease`;
   banner.innerHTML = `
     <img src="/icon-60.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"/>
-    <div style="flex:1">
+    <div style="flex:1;min-width:0;overflow:hidden">
       <div style="font-size:13px;font-weight:500;color:var(--txt)">Add CaloriTrack to Home Screen</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Tap <strong style="color:var(--txt)">Share</strong> then <strong style="color:var(--txt)">"Add to Home Screen"</strong></div>
     </div>
