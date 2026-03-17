@@ -96,11 +96,26 @@ select.inp{cursor:pointer}
 <div id="modal" style="display:none"></div>
 
 <script>
-// ── Storage ───────────────────────────────────────────────────────────────────
-const DBKEY = "caloritrack_v1";
-function loadDB(){try{const s=localStorage.getItem(DBKEY);return s?JSON.parse(s):{ingredients:[],rawIngredients:[],recipes:[]};}catch{return{ingredients:[],rawIngredients:[],recipes:[]};}}
-function saveDB(){localStorage.setItem(DBKEY,JSON.stringify(DB));}
-let DB = loadDB();
+// ── Storage (server-side shared across all devices) ───────────────────────────
+let DB = {ingredients:[], rawIngredients:[], recipes:[]};
+let _saveTimer = null;
+
+async function loadDB(){
+  try{
+    const r = await fetch("/api/data");
+    if(r.ok) DB = await r.json();
+  } catch(e){ console.warn("Could not load data from server:", e); }
+}
+
+function saveDB(){
+  // Debounce — batch rapid saves into one request
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async ()=>{
+    try{
+      await fetch("/api/data", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(DB)});
+    } catch(e){ console.warn("Could not save data:", e); }
+  }, 400);
+}
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 let _tt;
@@ -501,8 +516,23 @@ function bindAfterRender(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-render();
-checkKeyStatus();
+(async () => {
+  // Show loading state
+  document.getElementById("page").innerHTML = `<div style="text-align:center;padding:80px;color:var(--mut);font-size:12px"><div class="spin" style="margin:0 auto 16px"></div>Loading your data…</div>`;
+  await loadDB();
+  render();
+  checkKeyStatus();
+  // Poll for updates from other devices every 30 seconds
+  setInterval(async ()=>{
+    const fresh = {ingredients:[],rawIngredients:[],recipes:[]};
+    try{ const r=await fetch("/api/data"); if(r.ok) Object.assign(fresh, await r.json()); } catch{}
+    // Only re-render if data actually changed
+    if(JSON.stringify(fresh) !== JSON.stringify(DB)){
+      DB = fresh;
+      render();
+    }
+  }, 30000);
+})();
 </script>
 </body>
 </html>
