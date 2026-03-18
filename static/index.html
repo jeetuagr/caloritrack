@@ -5,263 +5,193 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="CaloriTrack"/>
-<meta name="theme-color" content="#f5f5f7"/>
-<meta name="description" content="Personal calorie and nutrition tracker"/>
+<meta name="theme-color" content="#f8f6f6"/>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png"/>
-<link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)" href="/splash-1170x2532.png"/>
-<link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)" href="/splash-1179x2556.png"/>
-<link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)" href="/splash-1290x2796.png"/>
 <link rel="icon" type="image/png" href="/favicon.png"/>
 <title>CaloriTrack</title>
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:"#ec5b13","bg-app":"#f8f6f6",success:"#22c55e","accent-blue":"#3b82f6","accent-pink":"#ec4899","accent-orange":"#f97316","accent-purple":"#a855f7"},fontFamily:{display:["Public Sans","sans-serif"]}}}}
+</script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f5f5f7;
-  --sur:#ffffff;
-  --card:#ffffff;
-  --card2:#f5f5f7;
-  --bor:#e5e5ea;
-  --bor2:#d1d1d6;
-  --acc:#007aff;
-  --acc-light:#e8f1ff;
-  --acc2:#34c759;
-  --acc2-light:#e8f8ed;
-  --red:#ff3b30;
-  --red-light:#fff0ef;
-  --ora:#ff9500;
-  --ora-light:#fff4e5;
-  --pur:#af52de;
-  --txt:#1c1c1e;
-  --txt2:#3c3c43;
-  --mut:#8e8e93;
-  --mut2:#aeaeb2;
-  --r:12px;
-  --r2:16px;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-  --shadow2:0 4px 16px rgba(0,0,0,.08);
-}
-html{overflow-x:hidden;overflow-y:scroll;background:var(--bg)}
-body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-x:none;overflow-x:hidden;width:100%;position:relative;font-size:15px;line-height:1.5}
-.app{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;overflow-x:hidden;width:100%}
+*,*::before,*::after{box-sizing:border-box}
+html{overflow-x:hidden;background:#f8f6f6}
+body{font-family:'Public Sans',sans-serif;background:#f8f6f6;color:#1e293b;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;user-select:none}
+.fill-icon{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+.no-scrollbar::-webkit-scrollbar{display:none}
+.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
 
-/* ── Header ── */
-.hdr{padding-top:calc(env(safe-area-inset-top) + 10px);padding-bottom:10px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
-.logo{font-size:17px;font-weight:700;color:var(--txt);letter-spacing:-.3px;flex-shrink:0}
-.logo span{color:var(--acc)}
+/* Safe areas */
+.hdr{padding-top:calc(env(safe-area-inset-top) + 12px) !important}
+.bottom-nav{padding-bottom:calc(env(safe-area-inset-bottom) + 8px) !important}
+.page-content{padding-bottom:calc(env(safe-area-inset-bottom) + 80px) !important}
 
-/* ── Nav tabs ── */
-.nav{display:flex;gap:2px;background:var(--card2);padding:3px;border-radius:10px;border:1px solid var(--bor);overflow-x:auto;flex:1;max-width:680px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.nb{padding:6px 12px;border:none;background:transparent;color:var(--mut);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .18s;white-space:nowrap;-webkit-touch-callout:none;user-select:none}
-.nb.on{background:var(--sur);color:var(--txt);font-weight:600;box-shadow:var(--shadow)}
-.nb:active{opacity:.7}
-@media(max-width:400px){.nb{padding:5px 8px;font-size:11px}}
+/* Progress ring animation */
+.progress-ring{transform:rotate(-90deg)}
+@keyframes ring-fill{from{stroke-dashoffset:553}to{stroke-dashoffset:var(--target-offset)}}
+.ring-animated{animation:ring-fill .8s ease-out forwards}
 
-/* ── Layout ── */
-.pg{flex:1;padding:20px 16px;padding-bottom:max(80px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));max-width:960px;margin:0 auto;width:100%;overflow-x:hidden;box-sizing:border-box}
-.h1{font-size:28px;font-weight:700;color:var(--txt);margin-bottom:4px;letter-spacing:-.5px}
-.sub{color:var(--mut);font-size:13px;margin-bottom:20px;line-height:1.5}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0}
-@media(max-width:600px){.g2{grid-template-columns:1fr}}
+/* Ingredient input rows */
+.ing-row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.ing-row input,.ing-row select{font-family:'Public Sans',sans-serif;font-size:15px;background:#f8f6f6;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;color:#1e293b;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.ing-row input:focus,.ing-row select:focus{border-color:#ec5b13;background:#fff}
+.ing-row input::placeholder{color:#94a3b8}
 
-/* ── Cards ── */
-.card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r2);padding:18px 16px;margin-bottom:12px;overflow:hidden;min-width:0;box-shadow:var(--shadow)}
-.ct{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin-bottom:12px;font-weight:600}
+/* Toast */
+.toast-el{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;z-index:9999;animation:toast-in .25s ease;max-width:300px;text-align:center;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+@keyframes toast-in{from{transform:translateX(-50%) translateY(10px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 
-/* ── Buttons ── */
-.btn{padding:10px 18px;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;transition:all .15s;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;-webkit-touch-callout:none;user-select:none;touch-action:manipulation}
-.btn:active{transform:scale(0.97);opacity:.85}
-.bp{background:var(--acc);color:#fff}.bp:hover{background:#0066dd}
-.bs{background:var(--card2);color:var(--txt2);border:1px solid var(--bor)}.bs:hover{background:#e5e5ea}
-.br{background:var(--red-light);color:var(--red);border:1px solid rgba(255,59,48,.15)}
-.bg2{background:var(--acc2);color:#fff}.bg2:hover{background:#2db350}
-.sm{padding:6px 11px;font-size:12px;border-radius:8px}
-.btn:disabled{opacity:.4;cursor:not-allowed}
+/* Modal slide up */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:200}
+.modal-box{background:#fff;border-radius:24px 24px 0 0;padding:20px 20px;padding-bottom:max(20px,env(safe-area-inset-bottom));width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+@media(min-width:600px){.modal-wrap{align-items:center;padding:20px}.modal-box{border-radius:20px}}
 
-/* ── Inputs ── */
-.inp{width:100%;background:var(--card2);border:1.5px solid var(--bor);border-radius:10px;padding:11px 13px;color:var(--txt);font-family:'Inter',sans-serif;font-size:16px;outline:none;transition:border-color .18s,-webkit-appearance .18s;-webkit-appearance:none;appearance:none}
-.inp:focus{border-color:var(--acc);background:var(--sur)}
-.inp::placeholder{color:var(--mut2)}
-.ig{display:flex;gap:6px;margin-bottom:10px;flex-wrap:nowrap;min-width:0;width:100%}.ig .inp{flex:1;min-width:0;width:0}
-select.inp{cursor:pointer;font-size:16px}
+/* Diet day pills */
+.day-pill-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:72px;border-radius:16px;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;transition:all .15s;font-family:'Public Sans',sans-serif}
+.day-pill-btn.active{background:#ec5b13;border-color:#ec5b13;color:#fff;box-shadow:0 4px 12px rgba(236,91,19,.3)}
+.day-pill-btn:not(.active){color:#64748b}
 
-/* ── Tables ── */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;display:block;border-radius:10px;border:1px solid var(--bor)}
-.tbl{border-collapse:collapse;width:100%;min-width:520px}
-.tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);padding:10px 12px;border-bottom:1px solid var(--bor);font-weight:600;background:var(--card2)}
-.tbl td{padding:10px 12px;border-bottom:1px solid var(--bor);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt)}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:#f9f9fb}
-
-/* ── Badges ── */
-.bdg{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
-.bgg{background:var(--acc-light);color:var(--acc)}
-.bgb{background:var(--acc2-light);color:var(--acc2)}
-.bgo{background:var(--ora-light);color:var(--ora)}
-.bgp{background:#f3e8ff;color:var(--pur)}
-.bgr{background:var(--red-light);color:var(--red)}
-
-/* ── Macro pills ── */
-.mrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;width:100%}
-.mpill{flex:1;min-width:64px;background:var(--card2);border:1px solid var(--bor);border-radius:10px;padding:10px 6px;text-align:center;box-sizing:border-box}
-.mpv{font-size:16px;color:var(--acc);font-weight:700}
-.mpl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:2px;font-weight:500}
-
-/* ── Hero ── */
-.hero{text-align:center;padding:24px 16px;background:linear-gradient(135deg,var(--acc-light),rgba(52,199,89,.08));border-radius:var(--r2);border:1px solid rgba(0,122,255,.12);margin-bottom:16px;width:100%;box-sizing:border-box}
-.hv{font-size:clamp(40px,12vw,58px);font-weight:700;color:var(--acc);line-height:1;letter-spacing:-2px}
-.hl{color:var(--mut);font-size:12px;margin-top:5px;text-transform:uppercase;letter-spacing:.8px;font-weight:500}
-.srow{display:flex;align-items:center;gap:10px;margin-top:16px;width:100%;min-width:0}
-.srow label{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;font-weight:500}
-.srow input[type=range]{flex:1;accent-color:var(--acc)}
-.srow .val{color:var(--acc);font-size:14px;font-weight:700;min-width:36px;text-align:right}
-
-/* ── Misc ── */
-.ld{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px;padding:10px 0}
-.spin{width:18px;height:18px;border:2.5px solid var(--bor);border-top-color:var(--acc);border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
+/* Spin */
+.spin{width:20px;height:20px;border:2.5px solid #e2e8f0;border-top-color:#ec5b13;border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:40px 20px;color:var(--mut);font-size:13px;line-height:1.9}
-.empty-icon{font-size:40px;margin-bottom:12px}
-.cambox{width:100%;aspect-ratio:4/3;max-height:260px;background:var(--card2);border:2px dashed var(--bor2);border-radius:var(--r2);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s;box-sizing:border-box}
-.cambox.drag{border-color:var(--acc);background:var(--acc-light)}
-.cambox video,.cambox img{width:100%;height:100%;object-fit:cover;display:block}
-.camhint{color:var(--mut);font-size:13px;text-align:center;line-height:1.8;pointer-events:none;padding:20px}
-.rir{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bor);flex-wrap:wrap;min-width:0}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border-radius:12px;border:1px solid #e2e8f0}
+.tbl{border-collapse:collapse;width:100%;min-width:540px}
+.tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;padding:10px 12px;border-bottom:1px solid #e2e8f0;font-weight:700;background:#f8fafc}
+.tbl td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+
+/* Camera box */
+.cam-box{width:100%;aspect-ratio:4/3;max-height:260px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
+.cam-box.drag{border-color:#ec5b13;background:#fff5f0}
+.cam-box video,.cam-box img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Recipe card */
+.rec-card{background:#fff;border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;align-items:center;gap:0;margin-bottom:10px}
+.rec-card:active{transform:scale(0.98)}
+
+/* Rir (ingredient row in recipe builder) */
+.rir{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9}
 .rir:last-child{border-bottom:none}
-
-/* ── Recipe cards ── */
-.rec-card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .18s;min-width:0;overflow:hidden;box-shadow:var(--shadow)}
-.rec-card:hover{border-color:var(--acc);box-shadow:var(--shadow2)}
-.rec-card:active{transform:scale(0.99)}
-
-/* ── Stats ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;width:100%}
-@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
-.stat{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r2);padding:16px;min-width:0;box-shadow:var(--shadow)}
-.stat-val{font-size:28px;font-weight:700;color:var(--acc);line-height:1;letter-spacing:-.5px}
-.stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:4px;font-weight:500}
-
-/* ── Toast ── */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;animation:su .3s ease;max-width:320px;line-height:1.4;box-shadow:0 8px 30px rgba(0,0,0,.15);text-align:center;white-space:nowrap}
-.ts{background:var(--txt);color:#fff}
-.te{background:var(--red);color:#fff}
-.ti{background:var(--acc2);color:#fff}
-@keyframes su{from{transform:translateX(-50%) translateY(16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-
-/* ── Modals ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center;z-index:200;padding:0}
-@media(min-width:600px){.modal-overlay{align-items:center;padding:20px}}
-.modal{background:var(--sur);border-radius:20px 20px 0 0;padding:24px 20px;padding-bottom:max(24px,env(safe-area-inset-bottom));width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
-@media(min-width:600px){.modal{border-radius:20px;padding:28px}}
-.modal-handle{width:36px;height:4px;background:var(--bor2);border-radius:2px;margin:0 auto 20px}
-
-/* ── Errbox ── */
-.errbox{padding:12px 14px;background:var(--red-light);border:1px solid rgba(255,59,48,.2);border-radius:10px;font-size:12px;color:var(--red);line-height:1.7;margin-top:10px}
-
-/* ── Daily diet progress bar ── */
-.progress-wrap{background:var(--card2);border-radius:20px;height:10px;overflow:hidden;margin-top:8px}
-.progress-bar{height:100%;border-radius:20px;transition:width .4s ease;background:var(--acc2)}
-.progress-bar.warn{background:var(--ora)}
-.progress-bar.over{background:var(--red)}
-
-/* ── Diet items ── */
-.diet-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bor);min-width:0}
-.diet-item:last-child{border-bottom:none}
-.diet-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.diet-info{flex:1;min-width:0}
-.diet-name{font-size:13px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.diet-meta{font-size:11px;color:var(--mut);margin-top:1px}
-.diet-cal{font-size:14px;font-weight:700;color:var(--acc);flex-shrink:0}
-
-/* ── Day pill selector ── */
-.day-tabs{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0;margin-bottom:16px}
-.day-tabs::-webkit-scrollbar{display:none}
-.day-pill{padding:8px 14px;border-radius:20px;border:1.5px solid var(--bor);background:var(--sur);font-size:12px;font-weight:500;color:var(--mut);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
-.day-pill.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
-.day-pill:active{transform:scale(0.96)}
-
-/* ── Section dividers ── */
-.sdiv{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin:16px 0 8px;padding:0 2px}
-
-/* ── Media ── */
-@media(max-width:640px){
-  .hdr{flex-wrap:wrap;gap:8px}
-  .nav{max-width:100%;order:2;flex:0 0 100%}
-  .logo{flex-shrink:0}
-}
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="hdr">
-    <div class="logo">Calori<span>Track</span></div>
-    <nav class="nav" id="nav"></nav>
+
+<!-- App shell -->
+<div id="app-shell" class="flex flex-col min-h-dvh">
+
+  <!-- Header -->
+  <header id="app-header" class="hdr bg-white border-b border-slate-200 sticky top-0 z-50 px-4 pb-0">
+    <div class="flex items-center justify-between py-3">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-3xl">local_fire_department</span>
+        <h1 class="text-xl font-bold tracking-tight">CaloriTrack</h1>
+      </div>
+      <div class="flex items-center gap-2" id="header-actions">
+        <!-- injected per page -->
+      </div>
+    </div>
+    <!-- Tab nav -->
+    <nav class="flex overflow-x-auto no-scrollbar border-t border-slate-100" id="tab-nav"></nav>
   </header>
-  <main class="pg" id="page"></main>
+
+  <!-- Page content -->
+  <main class="page-content flex-1 max-w-lg mx-auto w-full px-4 pt-5 space-y-5" id="page"></main>
+
 </div>
-<div id="toast" class="toast" style="display:none"></div>
-<div id="modal" style="display:none"></div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 px-4 pt-3 flex items-center justify-around z-50">
+  <button onclick="navigate('dashboard')" id="bn-dashboard" class="flex flex-col items-center gap-0.5 text-primary">
+    <span class="material-symbols-outlined fill-icon text-2xl">home</span>
+    <span class="text-[10px] font-bold">Home</span>
+  </button>
+  <button onclick="navigate('scan')" id="bn-scan" class="flex flex-col items-center gap-0.5 text-slate-400">
+    <span class="material-symbols-outlined text-2xl">qr_code_scanner</span>
+    <span class="text-[10px] font-bold">Scan</span>
+  </button>
+  <!-- FAB -->
+  <div class="relative -top-5">
+    <button onclick="navigate('raw')" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-primary/30 border-4 border-white">
+      <span class="material-symbols-outlined text-3xl">add</span>
+    </button>
+  </div>
+  <button onclick="navigate('recipes')" id="bn-recipes" class="flex flex-col items-center gap-0.5 text-slate-400">
+    <span class="material-symbols-outlined text-2xl">restaurant_menu</span>
+    <span class="text-[10px] font-bold">Recipes</span>
+  </button>
+  <button onclick="navigate('diet')" id="bn-diet" class="flex flex-col items-center gap-0.5 text-slate-400">
+    <span class="material-symbols-outlined text-2xl">calendar_month</span>
+    <span class="text-[10px] font-bold">Diet</span>
+  </button>
+</nav>
+
+<!-- Toast -->
+<div id="toast-el" class="toast-el" style="display:none"></div>
+<!-- Modal -->
+<div id="modal-root" style="display:none"></div>
 
 <script>
-// ── Storage ───────────────────────────────────────────────────────────────────
-let DB = {ingredients:[], rawIngredients:[], recipes:[], dailyDiet:{}, calorieTarget:2000, profiles:[], activeProfile:null};
-let _saveTimer = null;
+// ════════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════════
+let DB={ingredients:[],rawIngredients:[],recipes:[],dailyDiet:{},calorieTarget:2000,profiles:[],activeProfile:null};
+let _saveTimer=null;
+async function loadDB(){try{const r=await fetch("/api/data");if(r.ok)DB={...DB,...await r.json()};}catch(e){console.warn(e);}}
+function saveDB(){clearTimeout(_saveTimer);_saveTimer=setTimeout(async()=>{try{await fetch("/api/data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(DB)});}catch(e){console.warn(e);}},400);}
 
-async function loadDB(){
-  try{ const r=await fetch("/api/data"); if(r.ok) DB={...DB,...await r.json()}; }
-  catch(e){ console.warn("Could not load data:", e); }
-}
-function saveDB(){
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(async()=>{
-    try{ await fetch("/api/data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(DB)}); }
-    catch(e){ console.warn("Could not save:", e); }
-  }, 400);
-}
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════
 let _tt;
 function toast(msg,type="s"){
-  const el=document.getElementById("toast");
-  el.textContent=msg; el.className=`toast t${type}`; el.style.display="block";
-  clearTimeout(_tt); _tt=setTimeout(()=>el.style.display="none",3500);
+  const el=document.getElementById("toast-el");
+  el.textContent=msg;
+  el.style.display="block";
+  el.className="toast-el";
+  el.style.background=type==="e"?"#ef4444":type==="i"?"#22c55e":"#1e293b";
+  el.style.color="#fff";
+  clearTimeout(_tt);_tt=setTimeout(()=>el.style.display="none",3500);
 }
 
-// ── Claude API ────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// CLAUDE API
+// ════════════════════════════════════════════════════════
 async function callClaude(messages,system=""){
   const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages};
-  if(system) body.system=system;
+  if(system)body.system=system;
   const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
-  if(!r.ok||d.error) throw new Error(d.error||"API error "+r.status);
+  if(!r.ok||d.error)throw new Error(d.error||"API error "+r.status);
   return d.content?.map(b=>b.text||"").join("")||"";
 }
-
 async function scanLabel(dataUrl){
   const parts=dataUrl.split(",");
-  const mimeMatch=parts[0].match(/data:(image\/[^;]+)/);
-  const mime=mimeMatch?mimeMatch[1]:"image/jpeg";
-  const b64=parts[1];
+  const mime=(parts[0].match(/data:(image\/[^;]+)/)||[])[1]||"image/jpeg";
   const safeMime=["image/jpeg","image/png","image/gif","image/webp"].includes(mime)?mime:"image/jpeg";
   const sys=`You are a nutrition label reader. Return ONLY a raw JSON object, no markdown:\n{"productName":string,"servingSize":string,"caloriesPerServing":number,"protein":number,"carbs":number,"fat":number,"fiber":number|null,"ingredients":string}`;
-  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:safeMime,data:b64}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
+  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:safeMime,data:parts[1]}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
 }
-
 async function lookupCalories(items){
   const sys=`Return ONLY a raw JSON array, no markdown:\n[{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number,"fiberTotal":number}]\nUse USDA values. Always include fiberTotal (0 if none).`;
   const t=await callClaude([{role:"user",content:`Nutrition for: ${JSON.stringify(items)}`}],sys);
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return[];}
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function todayKey(){ return new Date().toISOString().split("T")[0]; }
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function todayKey(){return new Date().toISOString().split("T")[0];}
+function fmt(n){return typeof n==="number"?n.toFixed(1):n;}
 
 function allIngs(){
   return[
@@ -269,199 +199,375 @@ function allIngs(){
     ...DB.rawIngredients.map(i=>({id:String(i.id),label:`${i.name} (${i.quantity}${i.unit})`,cal:i.caloriesTotal||0,pro:i.proteinTotal||0,carb:i.carbsTotal||0,fat:i.fatTotal||0,fib:i.fiberTotal||0,type:"raw"})),
   ];
 }
-
 function calcTotals(ings,qty=1){
-  const lib=allIngs(); let cal=0,pro=0,carb=0,fat=0,fib=0;
-  ings.forEach(ri=>{
-    const ing=lib.find(a=>a.id===String(ri.ingredientId)); if(!ing)return;
-    cal+=ing.cal*ri.qty*qty; pro+=(ing.pro||0)*ri.qty*qty;
-    carb+=(ing.carb||0)*ri.qty*qty; fat+=(ing.fat||0)*ri.qty*qty; fib+=(ing.fib||0)*ri.qty*qty;
-  });
-  return{cal:Math.round(cal),pro:pro.toFixed(1),carb:carb.toFixed(1),fat:fat.toFixed(1),fib:fib.toFixed(1),netCarb:(carb-fib).toFixed(1)};
+  const lib=allIngs();let cal=0,pro=0,carb=0,fat=0,fib=0;
+  ings.forEach(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return;cal+=ing.cal*ri.qty*qty;pro+=(ing.pro||0)*ri.qty*qty;carb+=(ing.carb||0)*ri.qty*qty;fat+=(ing.fat||0)*ri.qty*qty;fib+=(ing.fib||0)*ri.qty*qty;});
+  return{cal:Math.round(cal),pro:pro.toFixed(1),carb:carb.toFixed(1),fat:fat.toFixed(1),fib:fib.toFixed(1),netCarb:Math.max(0,carb-fib).toFixed(1)};
 }
 
-function pillsHTML(items){
-  return`<div class="mrow">${items.map(([l,v,u,c])=>`<div class="mpill"><div class="mpv" style="color:${c||'var(--acc)'}">${v??"-"}${v!=null?u:""}</div><div class="mpl">${l}</div></div>`).join("")}</div>`;
+// ════════════════════════════════════════════════════════
+// PROFILE HELPERS
+// ════════════════════════════════════════════════════════
+function activeProfile(){
+  if(!DB.profiles||!DB.profiles.length)return null;
+  return DB.profiles.find(p=>p.id===DB.activeProfile)||DB.profiles[0];
 }
+function profileDiet(){const p=activeProfile();if(!p)return DB.dailyDiet||{};if(!p.dailyDiet)p.dailyDiet={};return p.dailyDiet;}
+function profileTarget(){const p=activeProfile();return(p?p.calorieTarget:null)||DB.calorieTarget||2000;}
+function setProfileTarget(v){const p=activeProfile();if(p)p.calorieTarget=v;else DB.calorieTarget=v;saveDB();}
+function migrateToProfiles(){
+  if(DB.profiles&&DB.profiles.length>0)return;
+  DB.profiles=[{id:"p_default",name:"Me",emoji:"😊",calorieTarget:DB.calorieTarget||2000,dailyDiet:DB.dailyDiet||{},createdAt:new Date().toISOString()}];
+  DB.activeProfile="p_default";saveDB();
+}
+function getDay(k){return profileDiet()[k]||[];}
+function setDay(k,e){profileDiet()[k]=e;saveDB();}
 
-function fmt(n){ return typeof n==="number"?n.toFixed(1):n; }
-
-// ── Router ────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// ROUTER
+// ════════════════════════════════════════════════════════
 let TAB="dashboard";
 const TABS=[["dashboard","Overview"],["scan","Scan"],["raw","Ingredients"],["recipes","Recipes"],["diet","Daily Diet"]];
+
 function navigate(tab){TAB=tab;render();}
+
 function render(){
-  document.getElementById("nav").innerHTML=TABS.map(([id,lbl])=>`<button class="nb${TAB===id?" on":""}" onclick="navigate('${id}')">${lbl}</button>`).join("");
+  // Tab nav
+  document.getElementById("tab-nav").innerHTML=TABS.map(([id,lbl])=>`
+    <button onclick="navigate('${id}')" class="flex-none px-4 py-3 text-sm font-bold border-b-2 transition-colors ${TAB===id?"border-primary text-primary":"border-transparent text-slate-400"}">${lbl}</button>
+  `).join("");
+
+  // Bottom nav highlight
+  ["dashboard","scan","recipes","diet"].forEach(id=>{
+    const bn=document.getElementById("bn-"+id);
+    if(!bn)return;
+    const isOn=TAB===id;
+    bn.className=`flex flex-col items-center gap-0.5 ${isOn?"text-primary":"text-slate-400"}`;
+    const icon=bn.querySelector(".material-symbols-outlined");
+    if(icon)icon.className=`material-symbols-outlined ${isOn?"fill-icon":""} text-2xl`;
+  });
+
+  // Header actions
+  document.getElementById("header-actions").innerHTML="";
+
+  // Render page
   const pg=document.getElementById("page");
-  if(TAB==="dashboard") pg.innerHTML=dashHTML();
-  else if(TAB==="scan") renderScan();
-  else if(TAB==="raw") renderRaw();
-  else if(TAB==="recipes") renderRecipes();
-  else if(TAB==="diet") renderDiet();
+  pg.className="page-content flex-1 max-w-lg mx-auto w-full px-4 pt-5 space-y-5";
+  if(TAB==="dashboard"){pg.innerHTML=dashHTML();animateRing();}
+  else if(TAB==="scan")renderScan();
+  else if(TAB==="raw")renderRaw();
+  else if(TAB==="recipes")renderRecipes();
+  else if(TAB==="diet")renderDiet();
   bindAfterRender();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ── DASHBOARD ────────────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
 function dashHTML(){
-  const top=[...DB.rawIngredients,...DB.ingredients.map(i=>({...i,name:i.productName,caloriesTotal:i.caloriesPerServing}))].sort((a,b)=>b.caloriesTotal-a.caloriesTotal).slice(0,5);
-  const recent=[...DB.recipes].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,3);
-  // Today's diet summary
   const today=getDay(todayKey());
   const todayCal=today.reduce((s,e)=>s+e.cal,0);
+  const todayPro=today.reduce((s,e)=>s+(e.pro||0),0);
+  const todayCarb=today.reduce((s,e)=>s+(e.carb||0),0);
+  const todayFat=today.reduce((s,e)=>s+(e.fat||0),0);
   const target=profileTarget();
   const pct=Math.min(100,Math.round(todayCal/target*100));
-  const barClass=pct>100?"over":pct>85?"warn":"";
+  const circumference=553;
+  const offset=Math.round(circumference*(1-pct/100));
+  const ringColor=pct>100?"#ef4444":pct>85?"#f97316":"#22c55e";
+
+  const top=[...DB.rawIngredients,...DB.ingredients.map(i=>({...i,name:i.productName,caloriesTotal:i.caloriesPerServing}))].sort((a,b)=>b.caloriesTotal-a.caloriesTotal).slice(0,5);
+  const recent=[...DB.recipes].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,4);
+
+  const prof=activeProfile();
+
   return`
-  <h2 class="h1">Overview</h2>
-  <p class="sub">Your nutrition hub — ${new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
-
-  <div class="card" style="background:linear-gradient(135deg,var(--acc-light),rgba(52,199,89,.06))">
-    <div class="ct">Today's Calories</div>
-    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
-      <span style="font-size:40px;font-weight:700;color:var(--acc);letter-spacing:-1px">${todayCal}</span>
-      <span style="font-size:14px;color:var(--mut);font-weight:500">/ ${target} kcal target</span>
-    </div>
-    <div class="progress-wrap"><div class="progress-bar ${barClass}" style="width:${pct}%"></div></div>
-    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--mut)">
-      <span>${target-todayCal>0?`${target-todayCal} kcal remaining`:`${todayCal-target} kcal over target`}</span>
-      <span>${pct}%</span>
-    </div>
-    <button class="btn bs sm" style="margin-top:12px;font-size:11px" onclick="navigate('diet')">Open Daily Diet →</button>
+  <!-- Heading -->
+  <div>
+    <h2 class="text-3xl font-bold">Overview</h2>
+    <p class="text-slate-400 font-medium mt-1 flex items-center gap-1 text-sm">
+      <span class="material-symbols-outlined text-sm">calendar_today</span>
+      ${new Date().toLocaleDateString("en-US",{weekday:"long",day:"numeric",month:"long"})}
+      ${prof?`<span class="ml-2 px-2 py-0.5 bg-orange-100 text-primary rounded-full text-xs font-bold">${prof.emoji} ${prof.name}</span>`:""}
+    </p>
   </div>
 
-  <div class="stats">
-    ${[["Packaged",DB.ingredients.length,"📦"],["Raw Ingredients",DB.rawIngredients.length,"🥦"],["Recipes",DB.recipes.length,"🍳"],["Diet Days",Object.keys(profileDiet()).length,"📅"]].map(([l,v,ic])=>`<div class="stat"><div style="font-size:20px;margin-bottom:4px">${ic}</div><div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`).join("")}
+  <!-- Calorie ring card -->
+  <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+    <div class="absolute top-0 right-0 p-4 opacity-10">
+      <span class="material-symbols-outlined text-7xl text-slate-400">nutrition</span>
+    </div>
+    <div class="flex flex-col items-center text-center">
+      <h3 class="text-base font-bold mb-4">Today's Calories</h3>
+      <div class="relative flex items-center justify-center mb-5">
+        <svg class="w-44 h-44 progress-ring">
+          <circle class="text-slate-100" cx="88" cy="88" fill="transparent" r="80" stroke="currentColor" stroke-width="11"/>
+          <circle id="ring-arc" cx="88" cy="88" fill="transparent" r="80"
+            stroke="${ringColor}" stroke-width="11" stroke-linecap="round"
+            stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}"
+            style="--target-offset:${offset};transition:stroke .3s"/>
+        </svg>
+        <div class="absolute flex flex-col items-center">
+          <span class="text-4xl font-black">${todayCal.toLocaleString()}</span>
+          <span class="text-sm font-medium text-slate-400">${target-todayCal>0?`${(target-todayCal).toLocaleString()} kcal left`:"Over target"}</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-6 w-full mb-6">
+        <div class="flex flex-col"><span class="text-xs font-bold text-accent-pink uppercase tracking-wider">Carbs</span><span class="text-lg font-bold">${todayCarb.toFixed(0)}g</span></div>
+        <div class="flex flex-col"><span class="text-xs font-bold text-accent-blue uppercase tracking-wider">Protein</span><span class="text-lg font-bold">${todayPro.toFixed(0)}g</span></div>
+        <div class="flex flex-col"><span class="text-xs font-bold text-accent-orange uppercase tracking-wider">Fat</span><span class="text-lg font-bold">${todayFat.toFixed(0)}g</span></div>
+      </div>
+      <button onclick="navigate('diet')" class="w-full bg-primary text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform text-sm">
+        Open Daily Diet
+      </button>
+    </div>
   </div>
 
-  ${top.length?`<div class="card"><div class="ct">Top Calorie Items</div>
-    ${top.map((i,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bor);font-size:13px"><span style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;border-radius:50%;background:var(--acc-light);color:var(--acc);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">${idx+1}</span>${i.name||i.productName}</span><span class="bdg bgg">${Math.round(i.caloriesTotal)} kcal</span></div>`).join("")}
-  </div>`:""}
-
-  ${recent.length?`<div class="card"><div class="ct">Recent Recipes</div>
-    ${recent.map(r=>{const t=calcTotals(r.ingredients);return`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bor);font-size:13px;cursor:pointer" onclick="openRecipe('${r.id}')"><span style="font-weight:600">${r.name}</span><span class="bdg bgg">${t.cal} kcal</span></div>`;}).join("")}
-  </div>`:""}
-
-  <div class="card"><div class="ct">Quick Actions</div>
-    ${[["📷","Scan Label","Camera or photo → AI reads nutrition label","scan"],["🥦","Log Ingredients","Enter foods to look up USDA calorie data","raw"],["🍳","Build Recipe","Combine ingredients with serving size","recipes"],["📅","Daily Diet","Log today's meals and track your target","diet"]].map(([ic,t,d,tab])=>`
-    <div onclick="navigate('${tab}')" style="display:flex;align-items:center;gap:14px;padding:13px 12px;background:var(--card2);border-radius:12px;border:1px solid var(--bor);cursor:pointer;margin-bottom:8px;transition:all .15s;overflow:hidden;min-width:0" onmouseenter="this.style.background='var(--acc-light)';this.style.borderColor='var(--acc)'" onmouseleave="this.style.background='var(--card2)';this.style.borderColor='var(--bor)'">
-      <span style="font-size:22px;flex-shrink:0">${ic}</span>
-      <div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--txt)">${t}</div><div style="font-size:11px;color:var(--mut);margin-top:1px">${d}</div></div>
-      <span style="margin-left:auto;color:var(--mut2);font-size:16px">›</span>
+  <!-- Stats grid -->
+  <div class="grid grid-cols-2 gap-3">
+    ${[["package_2","text-accent-blue","bg-blue-50",DB.ingredients.length,"Packaged"],
+       ["eco","text-success","bg-green-50",DB.rawIngredients.length,"Raw Ingredients"],
+       ["menu_book","text-accent-pink","bg-pink-50",DB.recipes.length,"Recipes"],
+       ["event_available","text-accent-orange","bg-orange-50",Object.keys(profileDiet()).length,"Diet Days"]
+    ].map(([icon,col,bg,val,lbl])=>`
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
+      <span class="material-symbols-outlined ${col} ${bg} p-2 rounded-xl mb-2 text-2xl">${icon}</span>
+      <span class="text-2xl font-bold">${val}</span>
+      <span class="text-xs font-medium text-slate-400 mt-0.5">${lbl}</span>
     </div>`).join("")}
   </div>
 
-  <div style="text-align:center;padding:12px 0">
-    <button class="btn bs sm" onclick="showTargetModal()" style="font-size:11px">⚙ ${activeProfile()?activeProfile().name+"'s":""} target: ${profileTarget()} kcal</button>
+  <!-- Top calorie items -->
+  ${top.length?`<section>
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-bold">Top Calorie Items</h3>
+    </div>
+    <div class="space-y-2">
+      ${top.map((item,idx)=>`
+      <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full font-bold text-sm text-slate-600">${idx+1}</div>
+          <div>
+            <p class="font-bold text-sm">${item.name||item.productName}</p>
+            <p class="text-xs text-slate-400">${item.quantity?item.quantity+item.unit:item.servingSize||""}</p>
+          </div>
+        </div>
+        <span class="font-bold text-primary text-sm">${Math.round(item.caloriesTotal)} kcal</span>
+      </div>`).join("")}
+    </div>
+  </section>`:""}
+
+  <!-- Recent Recipes -->
+  ${recent.length?`<section>
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-bold">Recent Recipes</h3>
+      <button onclick="navigate('recipes')" class="text-primary text-sm font-bold">See More</button>
+    </div>
+    <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+      ${recent.map(rec=>{const t=calcTotals(rec.ingredients);return`
+      <div onclick="openRecipe('${rec.id}')" class="flex-none w-44 bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm cursor-pointer active:scale-95 transition-transform">
+        <div class="w-full h-28 bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center">
+          <span class="material-symbols-outlined text-5xl text-primary/40">restaurant</span>
+        </div>
+        <div class="p-3">
+          <p class="font-bold text-sm truncate">${rec.name}</p>
+          <p class="text-xs text-success font-medium mt-0.5">${t.cal} kcal</p>
+        </div>
+      </div>`;}).join("")}
+    </div>
+  </section>`:""}
+
+  <!-- Quick Actions -->
+  <section>
+    <h3 class="text-lg font-bold mb-3">Quick Actions</h3>
+    <div class="space-y-2">
+      ${[["qr_code_scanner","bg-orange-50","text-primary","scan","Scan Label","Camera or photo → AI reads nutrition label"],
+         ["edit_note","bg-green-50","text-success","raw","Log Ingredients","Enter foods to look up USDA calorie data"],
+         ["cooking","bg-blue-50","text-accent-blue","recipes","Build Recipe","Combine ingredients with serving size"]
+      ].map(([icon,bg,col,tab,title,desc])=>`
+      <button onclick="navigate('${tab}')" class="w-full bg-white p-4 rounded-2xl flex items-center gap-4 border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors active:scale-[.98]">
+        <div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center ${col} flex-shrink-0">
+          <span class="material-symbols-outlined">${icon}</span>
+        </div>
+        <div class="text-left min-w-0">
+          <span class="font-bold text-sm block">${title}</span>
+          <span class="text-xs text-slate-400">${desc}</span>
+        </div>
+        <span class="material-symbols-outlined ml-auto text-slate-300">chevron_right</span>
+      </button>`).join("")}
+    </div>
+  </section>
+
+  <!-- Daily Targets footer -->
+  <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm mb-2">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm">Daily Targets</h3>
+      <button onclick="showTargetModal()" class="material-symbols-outlined text-slate-400 text-xl">settings</button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <div class="flex justify-between text-xs font-bold mb-1 uppercase tracking-tight">
+          <span class="text-slate-400">Calories</span>
+          <span>${todayCal.toLocaleString()} / ${target.toLocaleString()} kcal</span>
+        </div>
+        <div class="h-2 w-full bg-slate-100 rounded-full"><div class="h-2 rounded-full transition-all" style="width:${pct}%;background:${ringColor}"></div></div>
+      </div>
+    </div>
   </div>`;
+}
+
+function animateRing(){
+  const arc=document.getElementById("ring-arc");
+  if(arc){setTimeout(()=>arc.classList.add("ring-animated"),50);}
 }
 
 function showTargetModal(){
-  const m=document.getElementById("modal");
-  m.style.display="flex"; m.className="modal-overlay";
-  m.innerHTML=`<div class="modal">
-    <div class="modal-handle"></div>
-    <div style="font-size:18px;font-weight:700;color:var(--txt);margin-bottom:8px">Daily Calorie Target</div>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:16px">Set your daily calorie goal. This will show your progress on the Overview page.</p>
-    <input id="targetinp" class="inp" type="number" placeholder="e.g. 2000" value="${profileTarget()}" style="margin-bottom:14px"/>
-    <div style="display:flex;gap:8px">
-      <button class="btn bp" style="flex:1;justify-content:center" onclick="saveTarget()">Save</button>
-      <button class="btn bs" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+  showModal(`
+    <div class="modal-handle w-9 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+    <h3 class="text-lg font-bold mb-2">Daily Calorie Target</h3>
+    <p class="text-sm text-slate-400 mb-4">Set your daily calorie goal for ${activeProfile()?.name||"your profile"}.</p>
+    <input id="targetinp" type="number" placeholder="e.g. 2000" value="${profileTarget()}"
+      class="w-full bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-3 font-bold text-lg outline-none focus:border-primary mb-4" style="font-family:'Public Sans',sans-serif"/>
+    <div class="flex gap-3">
+      <button onclick="saveTarget()" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl">Save</button>
+      <button onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl">Cancel</button>
     </div>
-  </div>`;
+  `);
 }
 function saveTarget(){
   const v=parseInt(document.getElementById("targetinp")?.value);
-  if(!v||v<100){toast("Enter a valid calorie target (e.g. 2000)","e");return;}
-  setProfileTarget(v);
-  document.getElementById("modal").style.display="none";
-  toast("✓ Target updated"); render();
+  if(!v||v<100){toast("Enter a valid calorie target","e");return;}
+  setProfileTarget(v);closeModal();toast("✓ Target updated");render();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ── SCAN LABEL ───────────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════
-let camStream=null, scanCaptured=null, scanResult=null;
+// ════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ════════════════════════════════════════════════════════
+function showModal(html){
+  const root=document.getElementById("modal-root");
+  root.style.display="flex";
+  root.className="modal-wrap";
+  root.innerHTML=`<div class="modal-box">${html}</div>`;
+}
+function closeModal(){
+  const root=document.getElementById("modal-root");
+  root.style.display="none";root.innerHTML="";
+}
+
+// ════════════════════════════════════════════════════════
+// SCAN LABEL
+// ════════════════════════════════════════════════════════
+let camStream=null,scanCaptured=null,scanResult=null;
 
 function renderScan(){
-  document.getElementById("page").innerHTML=`
-  <h2 class="h1">Scan Label</h2>
-  <p class="sub">Use your camera or upload a photo of any nutrition label.</p>
-  <div class="g2">
-    <div class="card">
-      <div class="ct">Camera / Upload</div>
-      <div class="cambox" id="cambox" onclick="camboxClick()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+  const pg=document.getElementById("page");
+  pg.innerHTML=`
+  <div>
+    <h2 class="text-3xl font-bold">Scan Label</h2>
+    <p class="text-slate-400 text-sm mt-1">Camera or photo → AI reads nutrition info instantly</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Camera / Upload</p>
+      <div class="cam-box" id="cambox" onclick="camboxClick()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)">
         <video id="camvid" autoplay playsinline muted style="display:none;width:100%;height:100%;object-fit:cover"></video>
         <img id="camimg" style="display:none;width:100%;height:100%;object-fit:cover" alt="label"/>
-        <div id="camhint" class="camhint">
-          <div style="font-size:40px;margin-bottom:8px">📷</div>
-          <strong style="color:var(--txt);font-size:14px">Click to upload a photo</strong><br/>
-          or drag & drop here<br/>
-          <span style="font-size:11px;margin-top:6px;display:block;color:var(--mut2)">JPG · PNG · HEIC · screenshots</span>
+        <div id="camhint" class="flex flex-col items-center text-slate-400 p-4 text-center">
+          <span class="material-symbols-outlined text-5xl mb-2 text-slate-300">photo_camera</span>
+          <strong class="text-slate-600 text-sm">Click to upload</strong>
+          <span class="text-xs mt-1 text-slate-400">or drag & drop<br/>JPG · PNG · HEIC · screenshots</span>
         </div>
       </div>
       <input type="file" id="fileinput" accept="image/*" style="display:none" onchange="handleFileInput(this)"/>
-      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap" id="cambuts">
-        <button class="btn bp" onclick="startCam()">▶ Camera</button>
-        <button class="btn bs" onclick="document.getElementById('fileinput').click()">↑ Upload</button>
+      <div class="flex gap-2 mt-3" id="cambuts">
+        <button onclick="startCam()" class="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white font-bold py-2.5 rounded-xl text-sm">
+          <span class="material-symbols-outlined text-base">videocam</span>Camera
+        </button>
+        <button onclick="document.getElementById('fileinput').click()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-sm">
+          <span class="material-symbols-outlined text-base">upload</span>Upload
+        </button>
       </div>
-      <div id="camerr" style="display:none" class="errbox"></div>
-      <div id="scanld" style="display:none" class="ld"><div class="spin"></div>Analyzing with AI…</div>
+      <div id="camerr" style="display:none" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600"></div>
+      <div id="scanld" style="display:none" class="flex items-center gap-2 mt-3 text-slate-400 text-sm">
+        <div class="spin"></div>Analyzing with AI…
+      </div>
     </div>
-    <div class="card">
-      <div class="ct">Extracted Info</div>
-      <div id="scanresult"><div class="empty"><div class="empty-icon">🔍</div>Scan or upload a photo<br/>to extract nutrition info</div></div>
+
+    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Extracted Info</p>
+      <div id="scanresult">
+        <div class="flex flex-col items-center py-8 text-slate-300">
+          <span class="material-symbols-outlined text-5xl mb-2">document_search</span>
+          <span class="text-sm text-slate-400 text-center">Scan or upload a photo<br/>to extract nutrition info</span>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="card">
-    <div class="ct">Packaged Ingredient Library (${DB.ingredients.length})</div>
-    ${DB.ingredients.length===0?`<div class="empty"><div class="empty-icon">📦</div>No packaged ingredients yet.<br/>Scan a label above to get started.</div>`:`
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Product</th><th>Serving</th><th>Cal</th><th>Protein</th><th>Carbs</th><th>Net Carbs</th><th>Fibre</th><th>Fat</th><th></th></tr></thead><tbody>
-      ${DB.ingredients.map(i=>{const fib=i.fiber||0;const netC=Math.max(0,(i.carbs||0)-fib);return`<tr>
-        <td style="font-weight:600">${i.productName}</td>
-        <td style="color:var(--mut)">${i.servingSize}</td>
-        <td><span class="bdg bgg">${i.caloriesPerServing}</span></td>
-        <td>${i.protein||0}g</td><td>${i.carbs||0}g</td>
-        <td><span class="bdg bgp">${netC.toFixed(1)}g</span></td>
-        <td><span class="bdg bgo">${fib}g</span></td>
-        <td>${i.fat||0}g</td>
-        <td><button class="btn br sm" onclick="delIng('${i.id}')">✕</button></td>
-      </tr>`;}).join("")}
-    </tbody></table></div>`}
+
+  <!-- Library -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Packaged Library</p>
+      <span class="text-xs font-bold text-primary">${DB.ingredients.length} items</span>
+    </div>
+    ${DB.ingredients.length===0?`
+    <div class="flex flex-col items-center py-10 text-slate-300 px-4">
+      <span class="material-symbols-outlined text-4xl mb-2">inventory_2</span>
+      <span class="text-sm text-slate-400 text-center">No packaged ingredients yet.<br/>Scan a label above.</span>
+    </div>`:`
+    <div class="tbl-wrap" style="border:none;border-radius:0">
+      <table class="tbl">
+        <thead><tr><th>Product</th><th>Serving</th><th>Cal</th><th>Protein</th><th>Carbs</th><th>Net Carbs</th><th>Fibre</th><th>Fat</th><th></th></tr></thead>
+        <tbody>
+          ${DB.ingredients.map(i=>{const fib=i.fiber||0;const nc=Math.max(0,(i.carbs||0)-fib);return`
+          <tr>
+            <td class="font-semibold">${i.productName}</td>
+            <td class="text-slate-400">${i.servingSize}</td>
+            <td><span class="px-2 py-0.5 bg-green-50 text-success text-[10px] font-bold rounded-full">${i.caloriesPerServing}</span></td>
+            <td>${i.protein||0}g</td><td>${i.carbs||0}g</td>
+            <td><span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-[10px] font-bold rounded-full">${nc.toFixed(1)}g</span></td>
+            <td><span class="px-2 py-0.5 bg-orange-50 text-orange-500 text-[10px] font-bold rounded-full">${fib}g</span></td>
+            <td>${i.fat||0}g</td>
+            <td><button onclick="delIng('${i.id}')" class="w-7 h-7 flex items-center justify-center bg-red-50 text-red-400 rounded-lg text-xs font-bold hover:bg-red-100">✕</button></td>
+          </tr>`;}).join("")}
+        </tbody>
+      </table>
+    </div>`}
   </div>`;
-  if(scanCaptured) restoreScanImage();
-  if(scanResult) showScanResult(scanResult);
+  if(scanCaptured)restoreScanImage();
+  if(scanResult)showScanResult(scanResult);
 }
 
-function camboxClick(){if(!scanCaptured&&!camStream) document.getElementById("fileinput").click();}
+function camboxClick(){if(!scanCaptured&&!camStream)document.getElementById("fileinput").click();}
 function handleDrop(e){
-  e.preventDefault(); document.getElementById("cambox").classList.remove("drag");
+  e.preventDefault();document.getElementById("cambox").classList.remove("drag");
   const f=e.dataTransfer.files[0];
-  if(!f) return;
+  if(!f)return;
   if(!f.type.startsWith("image/")&&!f.name.match(/\.(heic|heif|jpg|jpeg|png|gif|webp|bmp|tiff?)$/i)){toast("Please upload an image file","e");return;}
   convertToJpeg(f);
 }
-function handleFileInput(inp){const f=inp.files[0];if(f) convertToJpeg(f);}
+function handleFileInput(inp){const f=inp.files[0];if(f)convertToJpeg(f);}
 function convertToJpeg(file){
   const url=URL.createObjectURL(file);
   const img=new Image();
   img.onload=function(){
     const canvas=document.createElement("canvas");
-    const MAX=1800; let w=img.naturalWidth,h=img.naturalHeight;
+    const MAX=1800;let w=img.naturalWidth,h=img.naturalHeight;
     if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
     canvas.width=w;canvas.height=h;
     const ctx=canvas.getContext("2d");
-    ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,w,h);
-    ctx.drawImage(img,0,0,w,h);
-    URL.revokeObjectURL(url);
-    showCaptured(canvas.toDataURL("image/jpeg",0.90));
+    ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);showCaptured(canvas.toDataURL("image/jpeg",.9));
   };
   img.onerror=function(){
     URL.revokeObjectURL(url);
     const reader=new FileReader();
     reader.onload=ev=>{
-      if(file.name.match(/\.(heic|heif)$/i)) toast("HEIC photo detected — if analysis fails go to iPhone Settings → Camera → Formats → Most Compatible","i");
+      if(file.name.match(/\.(heic|heif)$/i))toast("HEIC detected — if analysis fails, switch iPhone camera to Most Compatible format","i");
       showCaptured(ev.target.result);
     };
     reader.readAsDataURL(file);
@@ -469,8 +575,8 @@ function convertToJpeg(file){
   img.src=url;
 }
 async function startCam(){
-  const errEl=document.getElementById("camerr"); errEl.style.display="none";
-  if(!navigator.mediaDevices?.getUserMedia){errEl.textContent="⚠ Camera not available. Use Upload instead.";errEl.style.display="block";return;}
+  const errEl=document.getElementById("camerr");errEl.style.display="none";
+  if(!navigator.mediaDevices?.getUserMedia){errEl.textContent="⚠ Camera not available. Use Upload.";errEl.style.display="block";return;}
   try{
     if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
     let stream;
@@ -480,11 +586,13 @@ async function startCam(){
     const vid=document.getElementById("camvid"),hint=document.getElementById("camhint"),img=document.getElementById("camimg");
     vid.srcObject=stream;vid.style.display="block";hint.style.display="none";img.style.display="none";
     await vid.play();
-    document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="captureFrame()">📸 Capture</button><button class="btn bs" onclick="stopCam()">✕ Stop</button>`;
+    document.getElementById("cambuts").innerHTML=`
+      <button onclick="captureFrame()" class="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white font-bold py-2.5 rounded-xl text-sm"><span class="material-symbols-outlined text-base">photo_camera</span>Capture</button>
+      <button onclick="stopCam()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-sm">Stop</button>`;
     scanCaptured=null;scanResult=null;
-    document.getElementById("scanresult").innerHTML=`<div class="empty"><div class="empty-icon">🎯</div>Point at the label then click Capture</div>`;
+    document.getElementById("scanresult").innerHTML=`<div class="flex flex-col items-center py-8 text-slate-300"><span class="material-symbols-outlined text-4xl mb-2">center_focus_strong</span><span class="text-sm text-slate-400 text-center">Point at label then capture</span></div>`;
   }catch(err){
-    errEl.textContent=err.name==="NotAllowedError"?"⚠ Camera permission denied. Check your browser address bar.":err.name==="NotFoundError"?"⚠ No camera found. Use Upload instead.":`⚠ ${err.message}`;
+    errEl.textContent=err.name==="NotAllowedError"?"⚠ Camera permission denied. Check browser address bar.":err.name==="NotFoundError"?"⚠ No camera found. Use Upload.":`⚠ ${err.message}`;
     errEl.style.display="block";
   }
 }
@@ -492,115 +600,149 @@ function stopCam(){
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
   const vid=document.getElementById("camvid"),hint=document.getElementById("camhint");
   if(vid){vid.style.display="none";vid.srcObject=null;}if(hint)hint.style.display="flex";
-  document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="startCam()">▶ Camera</button><button class="btn bs" onclick="document.getElementById('fileinput').click()">↑ Upload</button>`;
+  document.getElementById("cambuts").innerHTML=`
+    <button onclick="startCam()" class="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white font-bold py-2.5 rounded-xl text-sm"><span class="material-symbols-outlined text-base">videocam</span>Camera</button>
+    <button onclick="document.getElementById('fileinput').click()" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-sm"><span class="material-symbols-outlined text-base">upload</span>Upload</button>`;
 }
 function captureFrame(){
   const vid=document.getElementById("camvid"),canvas=document.createElement("canvas");
   canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
   canvas.getContext("2d").drawImage(vid,0,0);
-  stopCam();showCaptured(canvas.toDataURL("image/jpeg",0.92));
+  stopCam();showCaptured(canvas.toDataURL("image/jpeg",.92));
 }
 function showCaptured(dataUrl){
   scanCaptured=dataUrl;scanResult=null;
   const img=document.getElementById("camimg"),hint=document.getElementById("camhint");
   if(img){img.src=dataUrl;img.style.display="block";}if(hint)hint.style.display="none";
-  document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="analyzeLabel()">✦ Analyze</button><button class="btn bs" onclick="resetScan()">✕ Remove</button>`;
-  document.getElementById("scanresult").innerHTML=`<div class="empty"><div class="empty-icon">✨</div>Click <strong style="color:var(--acc)">Analyze</strong> to extract nutrition info</div>`;
+  document.getElementById("cambuts").innerHTML=`
+    <button onclick="analyzeLabel()" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm">✦ Analyze</button>
+    <button onclick="resetScan()" class="bg-slate-100 text-slate-600 font-bold py-2.5 px-4 rounded-xl text-sm">✕</button>`;
+  document.getElementById("scanresult").innerHTML=`<div class="flex flex-col items-center py-8 text-slate-300"><span class="material-symbols-outlined text-4xl mb-2">auto_awesome</span><span class="text-sm text-slate-400 text-center">Tap <strong class="text-primary">Analyze</strong> to extract info</span></div>`;
 }
 function restoreScanImage(){
   const img=document.getElementById("camimg"),hint=document.getElementById("camhint");
   if(img){img.src=scanCaptured;img.style.display="block";}if(hint)hint.style.display="none";
-  document.getElementById("cambuts").innerHTML=`<button class="btn bp" onclick="analyzeLabel()">✦ Analyze</button><button class="btn bs" onclick="resetScan()">✕ Remove</button>`;
+  document.getElementById("cambuts").innerHTML=`
+    <button onclick="analyzeLabel()" class="flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm">✦ Analyze</button>
+    <button onclick="resetScan()" class="bg-slate-100 text-slate-600 font-bold py-2.5 px-4 rounded-xl text-sm">✕</button>`;
 }
 async function analyzeLabel(){
-  if(!scanCaptured) return;
+  if(!scanCaptured)return;
   const ld=document.getElementById("scanld");ld.style.display="flex";
   document.getElementById("scanresult").innerHTML="";
   try{
     const info=await scanLabel(scanCaptured);
     ld.style.display="none";
-    if(!info){document.getElementById("scanresult").innerHTML=`<div class="errbox">Could not parse label. Try a clearer, well-lit photo showing the full nutrition panel.</div>`;return;}
+    if(!info){document.getElementById("scanresult").innerHTML=`<div class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">Could not parse label. Try a clearer, well-lit photo.</div>`;return;}
     scanResult=info;showScanResult(info);
   }catch(err){
     ld.style.display="none";
-    document.getElementById("scanresult").innerHTML=`<div class="errbox"><strong>Error:</strong> ${err.message}</div>`;
+    document.getElementById("scanresult").innerHTML=`<div class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600"><strong>Error:</strong> ${err.message}</div>`;
   }
 }
 function showScanResult(info){
-  const fib=info.fiber||0; const netC=Math.max(0,(info.carbs||0)-fib);
+  const fib=info.fiber||0;const nc=Math.max(0,(info.carbs||0)-fib);
   document.getElementById("scanresult").innerHTML=`
-  <div style="margin-bottom:14px">
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin-bottom:6px;font-weight:600">Save as</div>
-    <input id="savename" class="inp" value="${info.productName}" placeholder="Product name…" style="font-size:15px;font-weight:600"/>
-    <div style="font-size:11px;color:var(--mut);margin-top:6px">Per serving: ${info.servingSize}</div>
+  <div class="mb-3">
+    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Save as</label>
+    <input id="savename" value="${info.productName}" placeholder="Product name…"
+      class="w-full mt-1 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-2.5 font-bold text-sm outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+    <p class="text-xs text-slate-400 mt-1">Per serving: ${info.servingSize}</p>
   </div>
-  <div class="hero" style="padding:16px;margin-bottom:12px">
-    <div class="hv" style="font-size:40px">${info.caloriesPerServing}</div>
-    <div class="hl">kcal per serving</div>
+  <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 text-center mb-3 border border-orange-100">
+    <span class="text-4xl font-black text-primary">${info.caloriesPerServing}</span>
+    <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mt-1">kcal per serving</p>
   </div>
-  ${pillsHTML([["Protein",info.protein,"g","var(--acc)"],["Carbs",info.carbs,"g","var(--ora)"],["Net Carbs",netC.toFixed(1),"g","var(--pur)"],["Fibre",fib,"g","var(--acc2)"],["Fat",info.fat,"g","var(--red)"]])}
-  ${info.ingredients?`<div style="margin-top:12px;font-size:11px;color:var(--mut);line-height:1.6;padding:10px;background:var(--card2);border-radius:8px"><strong style="color:var(--txt)">Ingredients: </strong>${info.ingredients}</div>`:""}
-  <button class="btn bp" style="margin-top:14px;width:100%;justify-content:center" onclick="savePackaged()">+ Save to Library</button>`;
+  <div class="grid grid-cols-5 gap-1.5 mb-3">
+    ${[["Pro",info.protein,"g","bg-blue-50 text-blue-600"],["Carbs",info.carbs,"g","bg-amber-50 text-amber-600"],["Net C",nc.toFixed(1),"g","bg-purple-50 text-purple-600"],["Fibre",fib,"g","bg-green-50 text-green-600"],["Fat",info.fat,"g","bg-red-50 text-red-500"]].map(([l,v,u,cls])=>`
+    <div class="${cls} rounded-xl p-2 text-center"><div class="text-sm font-bold">${v??"-"}${v!=null?u:""}</div><div class="text-[9px] font-bold uppercase mt-0.5 opacity-70">${l}</div></div>`).join("")}
+  </div>
+  ${info.ingredients?`<div class="text-[10px] text-slate-400 leading-relaxed p-2 bg-slate-50 rounded-xl"><strong class="text-slate-600">Ingredients: </strong>${info.ingredients}</div>`:""}
+  <button onclick="savePackaged()" class="w-full mt-3 bg-primary text-white font-bold py-3 rounded-xl text-sm">+ Save to Library</button>`;
   setTimeout(()=>{const el=document.getElementById("savename");if(el){el.focus();el.select();}},50);
 }
 function savePackaged(){
-  if(!scanResult) return;
-  const customName=(document.getElementById("savename")?.value||"").trim()||scanResult.productName;
-  DB.ingredients.push({...scanResult,productName:customName,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"});
-  saveDB();toast(`✓ Saved: ${customName}`);
-  scanResult=null;scanCaptured=null;render();
+  if(!scanResult)return;
+  const name=(document.getElementById("savename")?.value||"").trim()||scanResult.productName;
+  DB.ingredients.push({...scanResult,productName:name,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"});
+  saveDB();toast(`✓ Saved: ${name}`);scanResult=null;scanCaptured=null;render();
 }
 function resetScan(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}scanCaptured=null;scanResult=null;render();}
 function delIng(id){DB.ingredients=DB.ingredients.filter(i=>String(i.id)!==id);saveDB();render();}
 
-// ════════════════════════════════════════════════════════════════════
-// ── RAW INGREDIENTS ──────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// RAW INGREDIENTS
+// ════════════════════════════════════════════════════════
 const UNITS=["g","kg","ml","l","cup","tbsp","tsp","piece","oz"];
 let rawRows=[{name:"",qty:"",unit:"g"}];
 
 function renderRaw(){
   document.getElementById("page").innerHTML=`
-  <h2 class="h1">Raw Ingredients</h2>
-  <p class="sub">Enter any food — AI looks up USDA calorie and macro data.</p>
-  <div class="card"><div class="ct">Add Ingredients</div>
-    <div id="rawrows">${rawRows.map(rawRowHTML).join("")}</div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn bs" onclick="addRawRow()">+ Row</button>
-      <button class="btn bp" id="lookupbtn" onclick="doLookup()">✦ Find Calories</button>
-    </div>
-    <div id="rawld" style="display:none" class="ld"><div class="spin"></div>Querying USDA database…</div>
+  <div>
+    <h2 class="text-3xl font-bold">Ingredients</h2>
+    <p class="text-slate-400 text-sm mt-1">Enter any food — AI looks up USDA calorie data</p>
   </div>
-  <div class="card"><div class="ct">Raw Ingredient Library (${DB.rawIngredients.length})</div>
-    ${DB.rawIngredients.length===0?`<div class="empty"><div class="empty-icon">🥦</div>No raw ingredients yet.<br/>Enter some foods above to get started.</div>`:`
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Ingredient</th><th>Qty</th><th>Cal</th><th>Protein</th><th>Carbs</th><th>Net Carbs</th><th>Fibre</th><th>Fat</th><th></th></tr></thead><tbody>
-      ${DB.rawIngredients.map(i=>{const fib=i.fiberTotal||0;const netC=Math.max(0,(i.carbsTotal||0)-fib);return`<tr>
-        <td style="text-transform:capitalize;font-weight:600">${i.name}</td>
-        <td style="color:var(--mut)">${i.quantity}${i.unit}</td>
-        <td><span class="bdg bgg">${Math.round(i.caloriesTotal)}</span></td>
-        <td>${fmt(i.proteinTotal)}g</td><td>${fmt(i.carbsTotal)}g</td>
-        <td><span class="bdg bgp">${netC.toFixed(1)}g</span></td>
-        <td><span class="bdg bgo">${fib.toFixed(1)}g</span></td>
-        <td>${fmt(i.fatTotal)}g</td>
-        <td><button class="btn br sm" onclick="delRaw('${i.id}')">✕</button></td>
-      </tr>`;}).join("")}
-    </tbody></table></div>`}
+
+  <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Add Ingredients</p>
+    <div id="rawrows">${rawRows.map(rawRowHTML).join("")}</div>
+    <div class="flex gap-2 mt-2">
+      <button onclick="addRawRow()" class="flex items-center gap-1 bg-slate-100 text-slate-600 font-bold py-2 px-4 rounded-xl text-sm">
+        <span class="material-symbols-outlined text-base">add</span>Row
+      </button>
+      <button id="lookupbtn" onclick="doLookup()" class="flex-1 flex items-center justify-center gap-1.5 bg-primary text-white font-bold py-2.5 rounded-xl text-sm">
+        <span class="material-symbols-outlined text-base">search</span>Find Calories
+      </button>
+    </div>
+    <div id="rawld" style="display:none" class="flex items-center gap-2 mt-3 text-slate-400 text-sm">
+      <div class="spin"></div>Querying USDA database…
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Raw Ingredient Library</p>
+      <span class="text-xs font-bold text-success">${DB.rawIngredients.length} items</span>
+    </div>
+    ${DB.rawIngredients.length===0?`
+    <div class="flex flex-col items-center py-10 text-slate-300 px-4">
+      <span class="material-symbols-outlined text-4xl mb-2">eco</span>
+      <span class="text-sm text-slate-400 text-center">No raw ingredients yet.<br/>Enter foods above to get started.</span>
+    </div>`:`
+    <div class="tbl-wrap" style="border:none;border-radius:0">
+      <table class="tbl">
+        <thead><tr><th>Ingredient</th><th>Qty</th><th>Cal</th><th>Protein</th><th>Carbs</th><th>Net Carbs</th><th>Fibre</th><th>Fat</th><th></th></tr></thead>
+        <tbody>
+          ${DB.rawIngredients.map(i=>{const fib=i.fiberTotal||0;const nc=Math.max(0,(i.carbsTotal||0)-fib);return`
+          <tr>
+            <td class="font-semibold capitalize">${i.name}</td>
+            <td class="text-slate-400">${i.quantity}${i.unit}</td>
+            <td><span class="px-2 py-0.5 bg-green-50 text-success text-[10px] font-bold rounded-full">${Math.round(i.caloriesTotal)}</span></td>
+            <td>${fmt(i.proteinTotal)}g</td><td>${fmt(i.carbsTotal)}g</td>
+            <td><span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-[10px] font-bold rounded-full">${nc.toFixed(1)}g</span></td>
+            <td><span class="px-2 py-0.5 bg-orange-50 text-orange-500 text-[10px] font-bold rounded-full">${fib.toFixed(1)}g</span></td>
+            <td>${fmt(i.fatTotal)}g</td>
+            <td><button onclick="delRaw('${i.id}')" class="w-7 h-7 flex items-center justify-center bg-red-50 text-red-400 rounded-lg text-xs font-bold">✕</button></td>
+          </tr>`;}).join("")}
+        </tbody>
+      </table>
+    </div>`}
   </div>`;
 }
 function rawRowHTML(r,i){
-  return`<div class="ig" id="rr${i}">
-    <input class="inp" style="flex:2" placeholder="apple, oats, chicken…" value="${r.name}" oninput="rawRows[${i}].name=this.value"/>
-    <input class="inp" style="flex:0 0 62px;width:62px" type="number" placeholder="100" value="${r.qty}" oninput="rawRows[${i}].qty=this.value"/>
-    <select class="inp" style="flex:0 0 66px;width:66px" onchange="rawRows[${i}].unit=this.value">
+  return`<div class="ing-row">
+    <input style="flex:2;min-width:0" placeholder="apple, oats…" value="${r.name}" oninput="rawRows[${i}].name=this.value"/>
+    <input style="flex:0 0 60px;width:60px;text-align:center" type="number" placeholder="100" value="${r.qty}" oninput="rawRows[${i}].qty=this.value"/>
+    <select style="flex:0 0 65px;width:65px" onchange="rawRows[${i}].unit=this.value">
       ${UNITS.map(u=>`<option${u===r.unit?" selected":""}>${u}</option>`).join("")}
     </select>
-    ${rawRows.length>1?`<button class="btn br sm" onclick="rawRows.splice(${i},1);renderRaw()">✕</button>`:""}
+    ${rawRows.length>1?`<button onclick="rawRows.splice(${i},1);renderRaw()" class="w-8 h-9 flex items-center justify-center bg-red-50 text-red-400 rounded-xl text-sm flex-shrink-0">✕</button>`:""}
   </div>`;
 }
 function addRawRow(){rawRows.push({name:"",qty:"",unit:"g"});renderRaw();}
 async function doLookup(){
   const valid=rawRows.filter(r=>r.name.trim()&&r.qty);
-  if(!valid.length){toast("Add at least one ingredient with a name and quantity","e");return;}
+  if(!valid.length){toast("Add at least one ingredient with name and quantity","e");return;}
   document.getElementById("lookupbtn").disabled=true;
   document.getElementById("rawld").style.display="flex";
   try{
@@ -608,42 +750,60 @@ async function doLookup(){
     res.forEach(r=>DB.rawIngredients.push({...r,id:Date.now()+Math.random(),addedAt:new Date().toISOString(),type:"raw"}));
     saveDB();toast(`✓ Added ${res.length} ingredient${res.length>1?"s":""}`);
     rawRows=[{name:"",qty:"",unit:"g"}];renderRaw();
-  }catch(err){
-    toast("Error: "+(err.message||"unknown"),"e");
-  }
+  }catch(err){toast("Error: "+(err.message||"unknown"),"e");}
   const ld=document.getElementById("rawld");if(ld)ld.style.display="none";
   const lb=document.getElementById("lookupbtn");if(lb)lb.disabled=false;
 }
 function delRaw(id){DB.rawIngredients=DB.rawIngredients.filter(i=>String(i.id)!==String(id));saveDB();renderRaw();}
 
-// ════════════════════════════════════════════════════════════════════
-// ── RECIPES ──────────────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// RECIPES
+// ════════════════════════════════════════════════════════
 let recMode="list",curRecId=null,recServings=1,recIng=[],recName="",recDesc="";
-
 function openRecipe(id){curRecId=String(id);recMode="view";recServings=1;TAB="recipes";render();}
 
 function renderRecipes(){
   if(recMode==="view"&&curRecId){renderRecView();return;}
   if(recMode==="create"){renderRecCreate();return;}
   document.getElementById("page").innerHTML=`
-  <h2 class="h1">Recipes</h2>
-  <p class="sub">Build recipes from your ingredient library with serving size control.</p>
-  <button class="btn bp" style="margin-bottom:20px" onclick="startCreate()">+ New Recipe</button>
-  ${DB.recipes.length===0?`<div class="empty card"><div class="empty-icon">🍳</div>No recipes yet.<br/>Create your first recipe above.</div>`:
-  DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
-  <div class="rec-card" onclick="openRecipe('${rec.id}')">
-    <div style="flex:1;min-width:0;overflow:hidden">
-      <div style="font-size:16px;font-weight:700;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt)">${rec.name}</div>
-      ${rec.description?`<div style="font-size:12px;color:var(--mut);margin-bottom:2px">${rec.description}</div>`:""}
-      <div style="font-size:11px;color:var(--mut)">${rec.ingredients.length} item${rec.ingredients.length!==1?"s":""} · ${t.pro}g protein · ${t.netCarb}g net carbs</div>
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold">Recipes</h2>
+      <p class="text-slate-400 text-sm mt-1">Build from your ingredient library</p>
     </div>
-    <div style="text-align:right;flex-shrink:0;margin-left:14px">
-      <div style="font-size:26px;font-weight:700;color:var(--acc);letter-spacing:-.5px">${t.cal}</div>
-      <div style="font-size:9px;color:var(--mut);text-transform:uppercase;font-weight:500">kcal</div>
-    </div>
-    <button class="btn br sm" style="margin-left:10px" onclick="event.stopPropagation();delRecipe('${rec.id}')">✕</button>
-  </div>`;}).join("")}`;
+    <button onclick="startCreate()" class="flex items-center gap-1 bg-primary text-white font-bold py-2.5 px-4 rounded-xl text-sm shadow-sm">
+      <span class="material-symbols-outlined text-base">add</span>New
+    </button>
+  </div>
+  ${DB.recipes.length===0?`
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center py-14 px-4">
+    <span class="material-symbols-outlined text-5xl text-slate-200 mb-3">menu_book</span>
+    <p class="text-slate-400 text-sm text-center">No recipes yet.<br/>Create your first recipe above.</p>
+  </div>`:`
+  <div class="space-y-3">
+    ${DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
+    <div onclick="openRecipe('${rec.id}')" class="rec-card">
+      <div class="w-24 h-20 flex-shrink-0 bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl text-primary/40">restaurant</span>
+      </div>
+      <div class="flex-1 p-3 min-w-0">
+        <p class="font-bold truncate">${rec.name}</p>
+        ${rec.description?`<p class="text-xs text-slate-400 truncate mt-0.5">${rec.description}</p>`:""}
+        <div class="flex items-center gap-3 mt-1.5">
+          <span class="text-xs text-slate-400">${rec.ingredients.length} items</span>
+          <span class="text-xs text-slate-300">·</span>
+          <span class="text-xs text-blue-500 font-medium">${t.pro}g protein</span>
+          <span class="text-xs text-slate-300">·</span>
+          <span class="text-xs text-purple-500 font-medium">${t.netCarb}g net C</span>
+        </div>
+      </div>
+      <div class="px-3 text-right flex-shrink-0">
+        <p class="text-xl font-black text-primary">${t.cal}</p>
+        <p class="text-[9px] text-slate-400 uppercase font-bold">kcal</p>
+      </div>
+      <button onclick="event.stopPropagation();delRecipe('${rec.id}')" class="w-8 h-8 mr-2 flex items-center justify-center bg-red-50 text-red-400 rounded-xl text-xs flex-shrink-0">✕</button>
+    </div>`;}).join("")}
+  </div>`}`;
 }
 
 function renderRecView(){
@@ -651,30 +811,74 @@ function renderRecView(){
   if(!rec){recMode="list";renderRecipes();return;}
   const tot=calcTotals(rec.ingredients,recServings),ps=calcTotals(rec.ingredients,1),lib=allIngs();
   document.getElementById("page").innerHTML=`
-  <button class="btn bs sm" onclick="recMode='list';render()" style="margin-bottom:16px">← Recipes</button>
-  <h2 class="h1">${rec.name}</h2>${rec.description?`<p class="sub">${rec.description}</p>`:""}
-  <div class="hero">
-    <div class="hv">${tot.cal}</div>
-    <div class="hl">kcal · ${recServings} serving${recServings>1?"s":""}</div>
-    <div class="srow" style="max-width:380px;margin:16px auto 0">
-      <label>Servings</label>
-      <input type="range" min=".5" max="10" step=".5" value="${recServings}" id="servslider" oninput="recServings=+this.value;renderRecipes()"/>
-      <span class="val">${recServings}×</span>
+  <button onclick="recMode='list';render()" class="flex items-center gap-1 text-slate-400 font-bold text-sm mb-1">
+    <span class="material-symbols-outlined text-base">arrow_back_ios</span>Recipes
+  </button>
+  <div>
+    <h2 class="text-3xl font-bold">${rec.name}</h2>
+    ${rec.description?`<p class="text-slate-400 text-sm mt-1">${rec.description}</p>`:""}
+  </div>
+
+  <!-- Ring + macros -->
+  <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+    <div class="flex items-center gap-5">
+      <div class="relative w-28 h-28 flex-shrink-0">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+          <circle class="stroke-slate-100" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.5"/>
+          <circle class="stroke-primary" cx="18" cy="18" fill="none" r="15.9155"
+            stroke-dasharray="${Math.min(100,Math.round(tot.cal/profileTarget()*100))},100"
+            stroke-linecap="round" stroke-width="3.5"/>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span class="text-xl font-black text-primary leading-none">${tot.cal}</span>
+          <span class="text-[9px] text-slate-400 uppercase font-bold mt-0.5">kcal</span>
+        </div>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs font-bold text-slate-500 mb-2">${recServings} serving${recServings>1?"s":""}</p>
+        <div class="grid grid-cols-2 gap-y-2 gap-x-3">
+          ${[["Protein",tot.pro,"g","bg-blue-50 text-blue-600"],["Carbs",tot.carb,"g","bg-amber-50 text-amber-600"],["Net Carbs",tot.netCarb,"g","bg-purple-50 text-purple-600"],["Fat",tot.fat,"g","bg-red-50 text-red-500"]].map(([l,v,u,cls])=>`
+          <div class="${cls} rounded-xl px-2 py-1.5 text-center">
+            <div class="text-sm font-bold">${v}${u}</div>
+            <div class="text-[9px] font-bold uppercase opacity-70">${l}</div>
+          </div>`).join("")}
+        </div>
+        <div class="flex items-center gap-2 mt-3">
+          <span class="text-xs text-slate-400 font-bold">SERVINGS</span>
+          <input type="range" min=".5" max="10" step=".5" value="${recServings}"
+            class="flex-1 accent-primary" oninput="recServings=+this.value;renderRecipes()"/>
+          <span class="text-sm font-bold text-primary w-8 text-right">${recServings}×</span>
+        </div>
+      </div>
     </div>
   </div>
-  ${pillsHTML([["Calories",tot.cal,"kcal","var(--acc)"],["Protein",tot.pro,"g","var(--acc)"],["Net Carbs",tot.netCarb,"g","var(--pur)"],["Fibre",tot.fib,"g","var(--acc2)"],["Fat",tot.fat,"g","var(--red)"]])}
-  <div class="card" style="margin-top:14px">
-    <div class="ct">Ingredients</div>
-    ${rec.ingredients.map(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return"";const pct=tot.cal>0?Math.round(ing.cal*ri.qty*recServings/tot.cal*100):0;
-    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bor);font-size:13px;min-width:0;gap:8px">
-      <div style="min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ri.qty}× ${ing.label}</div><div style="color:var(--mut);font-size:11px;margin-top:1px">${pct}% of total calories</div></div>
-      <span style="color:var(--acc);font-weight:700;flex-shrink:0">${Math.round(ing.cal*ri.qty*recServings)} kcal</span>
-    </div>`;}).join("")}
-    <div style="margin-top:12px;padding:12px;background:var(--card2);border-radius:10px;font-size:12px;color:var(--mut)">
-      Per 1 serving: <strong style="color:var(--txt)">${ps.cal} kcal</strong> · ${ps.pro}g protein · ${ps.netCarb}g net carbs · ${ps.fib}g fibre · ${ps.fat}g fat
+
+  <!-- Ingredients -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingredients</p>
+    </div>
+    <div class="divide-y divide-slate-50 px-4">
+      ${rec.ingredients.map(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return"";const pct=tot.cal>0?Math.round(ing.cal*ri.qty*recServings/tot.cal*100):0;return`
+      <div class="flex items-center gap-3 py-3">
+        <div class="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary text-lg">${ing.type==="pkg"?"inventory_2":"eco"}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm truncate">${ri.qty}× ${ing.label}</p>
+          <p class="text-xs text-slate-400">${pct}% of total</p>
+        </div>
+        <span class="text-sm font-bold text-primary flex-shrink-0">${Math.round(ing.cal*ri.qty*recServings)} kcal</span>
+      </div>`;}).join("")}
+    </div>
+    <div class="px-4 py-3 bg-slate-50 border-t border-slate-100">
+      <p class="text-xs text-slate-400">Per 1 serving: <strong class="text-slate-700">${ps.cal} kcal</strong> · ${ps.pro}g protein · ${ps.netCarb}g net carbs · ${ps.fib}g fibre · ${ps.fat}g fat</p>
     </div>
   </div>
-  <button class="btn bg2" style="width:100%;justify-content:center;margin-top:4px" onclick="addRecipeToDiet('${rec.id}')">+ Add to Today's Diet</button>`;
+
+  <button onclick="addRecipeToDiet('${rec.id}')" class="w-full bg-success text-white font-bold py-3.5 rounded-2xl text-sm shadow-sm flex items-center justify-center gap-2">
+    <span class="material-symbols-outlined text-base">add_circle</span>Add to Today's Diet
+  </button>`;
 }
 
 function startCreate(){recMode="create";recName="";recDesc="";recIng=[{ingredientId:"",qty:1}];renderRecipes();}
@@ -685,32 +889,61 @@ function renderRecCreate(){
     ${DB.rawIngredients.length?`<optgroup label="🥦 Raw">${DB.rawIngredients.map(i=>`<option value="${i.id}">${i.name} ${i.quantity}${i.unit} · ${Math.round(i.caloriesTotal)} kcal</option>`).join("")}</optgroup>`:""}`;
   const prev=calcTotals(recIng.filter(r=>r.ingredientId));
   document.getElementById("page").innerHTML=`
-  <button class="btn bs sm" onclick="recMode='list';render()" style="margin-bottom:16px">← Cancel</button>
-  <h2 class="h1">New Recipe</h2><p class="sub">Combine ingredients and see a live calorie preview.</p>
-  <div class="card"><div class="ct">Details</div>
-    <input class="inp" id="rname" placeholder="Recipe name (e.g. Protein Oat Bowl)" value="${recName}" oninput="recName=this.value" style="margin-bottom:10px"/>
-    <input class="inp" id="rdesc" placeholder="Description (optional)" value="${recDesc}" oninput="recDesc=this.value"/>
+  <button onclick="recMode='list';render()" class="flex items-center gap-1 text-slate-400 font-bold text-sm">
+    <span class="material-symbols-outlined text-base">arrow_back_ios</span>Cancel
+  </button>
+  <div>
+    <h2 class="text-3xl font-bold">New Recipe</h2>
+    <p class="text-slate-400 text-sm mt-1">Combine ingredients and see a live calorie preview</p>
   </div>
-  <div class="card"><div class="ct">Ingredients</div>
-    ${!lib.length?`<div class="empty">Add ingredients in Scan or Raw Ingredients first.</div>`:""}
-    <div id="recings">
-      ${recIng.map((ri,i)=>`<div class="rir">
-        <select class="inp" style="flex:3" data-idx="${i}" onchange="recIng[${i}].ingredientId=this.value;rerenderRecPreview()">${opts}</select>
-        <input class="inp" type="number" min=".1" step=".1" style="flex:1;max-width:72px" value="${ri.qty}" oninput="recIng[${i}].qty=+this.value;rerenderRecPreview()"/>
-        <span style="font-size:11px;color:var(--mut)">×</span>
-        <button class="btn br sm" onclick="recIng.splice(${i},1);renderRecipes()">✕</button>
+  <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+    <div>
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Recipe Name</label>
+      <input id="rname" placeholder="e.g. Protein Oat Bowl" value="${recName}" oninput="recName=this.value"
+        class="w-full mt-1 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+    </div>
+    <div>
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Description (optional)</label>
+      <input id="rdesc" placeholder="Short description…" value="${recDesc}" oninput="recDesc=this.value"
+        class="w-full mt-1 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingredients</p>
+      <button onclick="recIng.push({ingredientId:'',qty:1});renderRecipes()" class="text-xs font-bold text-primary flex items-center gap-0.5">
+        <span class="material-symbols-outlined text-sm">add</span>Add
+      </button>
+    </div>
+    ${!lib.length?`<p class="text-sm text-slate-400 text-center py-4">Add ingredients in Scan or Raw Ingredients first.</p>`:""}
+    <div id="recings" class="space-y-0 divide-y divide-slate-50">
+      ${recIng.map((ri,i)=>`
+      <div class="rir">
+        <select class="flex-1 min-w-0 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif;font-size:14px" data-idx="${i}" onchange="recIng[${i}].ingredientId=this.value;rerenderRecPreview()">${opts}</select>
+        <input type="number" min=".1" step=".1" value="${ri.qty}"
+          class="w-16 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-2.5 text-sm font-bold text-center outline-none focus:border-primary flex-shrink-0" style="font-family:'Public Sans',sans-serif"
+          oninput="recIng[${i}].qty=+this.value;rerenderRecPreview()"/>
+        <span class="text-xs text-slate-400 flex-shrink-0">×</span>
+        <button onclick="recIng.splice(${i},1);renderRecipes()" class="w-8 h-9 flex items-center justify-center bg-red-50 text-red-400 rounded-xl text-sm flex-shrink-0">✕</button>
       </div>`).join("")}
     </div>
-    <button class="btn bs" style="margin-top:12px" onclick="recIng.push({ingredientId:'',qty:1});renderRecipes()">+ Add</button>
   </div>
-  <div id="recpreview">${recIng.some(r=>r.ingredientId)?`<div class="hero"><div class="hv">${prev.cal}</div><div class="hl">kcal · ${prev.pro}g protein · ${prev.netCarb}g net carbs · ${prev.fib}g fibre</div></div>`:""}</div>
-  <button class="btn bp" style="width:100%;justify-content:center;margin-top:4px" onclick="saveRecipe()">Save Recipe</button>`;
+  <div id="recpreview">${recIng.some(r=>r.ingredientId)?`
+  <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 text-center border border-orange-100">
+    <span class="text-4xl font-black text-primary">${prev.cal}</span>
+    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">kcal · ${prev.pro}g protein · ${prev.netCarb}g net carbs · ${prev.fib}g fibre</p>
+  </div>`:""}</div>
+  <button onclick="saveRecipe()" class="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-sm shadow-sm">Save Recipe</button>`;
   document.querySelectorAll("#recings select").forEach((sel,i)=>{if(recIng[i]?.ingredientId)sel.value=recIng[i].ingredientId;});
 }
 function rerenderRecPreview(){
   const prev=calcTotals(recIng.filter(r=>r.ingredientId));
   const el=document.getElementById("recpreview");
-  if(el) el.innerHTML=recIng.some(r=>r.ingredientId)?`<div class="hero"><div class="hv">${prev.cal}</div><div class="hl">kcal · ${prev.pro}g protein · ${prev.netCarb}g net carbs · ${prev.fib}g fibre</div></div>`:"";
+  if(el)el.innerHTML=recIng.some(r=>r.ingredientId)?`
+  <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 text-center border border-orange-100">
+    <span class="text-4xl font-black text-primary">${prev.cal}</span>
+    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">kcal · ${prev.pro}g protein · ${prev.netCarb}g net carbs · ${prev.fib}g fibre</p>
+  </div>`:"";
 }
 function saveRecipe(){
   recName=document.getElementById("rname")?.value.trim()||recName;
@@ -726,447 +959,370 @@ function delRecipe(id){
   DB.recipes=DB.recipes.filter(r=>String(r.id)!==String(id));saveDB();toast("Deleted");render();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ── DAILY DIET ───────────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════
-let dietViewDate = todayKey();
+// ════════════════════════════════════════════════════════
+// DAILY DIET
+// ════════════════════════════════════════════════════════
+let dietViewDate=todayKey();
 
-// ── Profile helpers ──────────────────────────────────────────────────────────
-function activeProfile(){
-  if(!DB.profiles||DB.profiles.length===0) return null;
-  return DB.profiles.find(p=>p.id===DB.activeProfile)||DB.profiles[0];
-}
-function profileDiet(){
-  const p=activeProfile();
-  if(!p) return DB.dailyDiet||{};   // legacy fallback
-  if(!p.dailyDiet) p.dailyDiet={};
-  return p.dailyDiet;
-}
-function profileTarget(){
-  const p=activeProfile();
-  return (p?p.calorieTarget:null)||DB.calorieTarget||2000;
-}
-function setProfileTarget(v){
-  const p=activeProfile();
-  if(p) p.calorieTarget=v; else DB.calorieTarget=v;
-  saveDB();
-}
-function migrateToProfiles(){
-  // One-time migration: wrap existing dailyDiet data into a default profile
-  if(DB.profiles&&DB.profiles.length>0) return;
-  const defaultProfile={id:"p_default",name:"Me",emoji:"😊",calorieTarget:DB.calorieTarget||2000,dailyDiet:DB.dailyDiet||{},createdAt:new Date().toISOString()};
-  DB.profiles=[defaultProfile];
-  DB.activeProfile="p_default";
-  saveDB();
-}
-function getDay(dateKey){
-  return profileDiet()[dateKey]||[];
-}
-function setDay(dateKey, entries){
-  const diet=profileDiet();
-  diet[dateKey]=entries;
-  saveDB();
-}
-
-function last30Days(){
-  const days=[];
-  for(let i=0;i<30;i++){
-    const d=new Date(); d.setDate(d.getDate()-i);
-    days.push(d.toISOString().split("T")[0]);
-  }
-  return days;
-}
-
-function fmtDateLabel(key){
+function fmtDateLabel(k){
   const today=todayKey();
-  const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1);
-  const yKey=yesterday.toISOString().split("T")[0];
-  if(key===today) return"Today";
-  if(key===yKey) return"Yesterday";
-  const d=new Date(key+"T00:00:00");
+  const yd=new Date();yd.setDate(yd.getDate()-1);const ydKey=yd.toISOString().split("T")[0];
+  if(k===today)return"Today";if(k===ydKey)return"Yest.";
+  const d=new Date(k+"T00:00:00");
   return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
 }
-
-function fmtDayFull(key){
-  const d=new Date(key+"T00:00:00");
-  return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-}
-
-function dietTotals(entries){
-  return entries.reduce((acc,e)=>({
-    cal:acc.cal+e.cal, pro:acc.pro+(e.pro||0),
-    carb:acc.carb+(e.carb||0), fat:acc.fat+(e.fat||0),
-    fib:acc.fib+(e.fib||0)
-  }),{cal:0,pro:0,carb:0,fat:0,fib:0});
-}
+function fmtDayFull(k){const d=new Date(k+"T00:00:00");return d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});}
+function last30Days(){const d=[];for(let i=0;i<30;i++){const dt=new Date();dt.setDate(dt.getDate()-i);d.push(dt.toISOString().split("T")[0]);}return d;}
+function dietTotals(entries){return entries.reduce((a,e)=>({cal:a.cal+e.cal,pro:a.pro+(e.pro||0),carb:a.carb+(e.carb||0),fat:a.fat+(e.fat||0),fib:a.fib+(e.fib||0)}),{cal:0,pro:0,carb:0,fat:0,fib:0});}
 
 function renderDiet(){
   const days=last30Days();
   const entries=getDay(dietViewDate);
   const tot=dietTotals(entries);
-  const netCarb=Math.max(0,tot.carb-tot.fib);
+  const nc=Math.max(0,tot.carb-tot.fib);
   const target=profileTarget();
   const pct=Math.min(100,Math.round(tot.cal/target*100));
-  const barClass=pct>100?"over":pct>85?"warn":"";
   const isToday=dietViewDate===todayKey();
-
   const prof=activeProfile();
-  const profName=prof?prof.name:"Me";
-  const profEmoji=prof?prof.emoji:"😊";
+  const ringColor=pct>100?"#ef4444":pct>85?"#f97316":"#22c55e";
 
   document.getElementById("page").innerHTML=`
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+  <!-- Header row -->
+  <div class="flex items-start justify-between">
     <div>
-      <h2 class="h1" style="margin-bottom:2px">Daily Diet</h2>
-      <p style="color:var(--mut);font-size:13px">Track meals day by day · 30-day history</p>
+      <h2 class="text-3xl font-bold">Daily Diet</h2>
+      <p class="text-slate-400 text-sm mt-1">Track meals day by day · 30-day history</p>
     </div>
-    <button onclick="showProfileModal()" style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--sur);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);font-family:'Inter',sans-serif" onmouseenter="this.style.borderColor='var(--acc)'" onmouseleave="this.style.borderColor='var(--bor)'">
-      <span style="font-size:20px">${profEmoji}</span>
-      <div style="text-align:left">
-        <div style="font-size:13px;font-weight:700;color:var(--txt)">${profName}</div>
-      </div>
-      <span style="color:var(--mut2);font-size:14px;margin-left:2px">›</span>
+    <button onclick="showProfileModal()" class="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-sm active:scale-95 transition-transform">
+      <span class="text-xl">${prof?.emoji||"😊"}</span>
+      <span class="text-sm font-bold">${prof?.name||"Me"}</span>
+      <span class="material-symbols-outlined text-slate-300 text-base">expand_more</span>
     </button>
   </div>
 
-  <!-- Day selector -->
-  <div class="day-tabs" id="daytabs">
-    ${days.map(d=>{
-      const ents=getDay(d); const cal=ents.reduce((s,e)=>s+e.cal,0);
-      return`<div class="day-pill${d===dietViewDate?" on":""}" onclick="dietViewDate='${d}';renderDiet()">
-        <div>${fmtDateLabel(d)}</div>
-        ${ents.length?`<div style="font-size:10px;opacity:.75;margin-top:1px">${cal} kcal</div>`:`<div style="font-size:10px;opacity:.5;margin-top:1px">—</div>`}
-      </div>`;
-    }).join("")}
+  <!-- Day selector - calendar style -->
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select Day</p>
+      ${!isToday?`<button onclick="dietViewDate=todayKey();renderDiet()" class="text-xs font-bold text-primary">→ Today</button>`:""}
+    </div>
+    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      ${days.map(d=>{
+        const ents=getDay(d);const cal=ents.reduce((s,e)=>s+e.cal,0);
+        const dt=new Date(d+"T00:00:00");
+        const dayName=dt.toLocaleDateString("en-US",{weekday:"short"}).toUpperCase();
+        const dayNum=dt.getDate();
+        const isOn=d===dietViewDate;
+        return`<button onclick="dietViewDate='${d}';renderDiet()" class="day-pill-btn${isOn?" active":""}">
+          <span class="text-[9px] font-bold uppercase">${dayName}</span>
+          <span class="text-lg font-bold leading-none">${dayNum}</span>
+          ${ents.length?`<div class="w-1.5 h-1.5 rounded-full mt-0.5 ${isOn?"bg-white":"bg-primary"}"></div>`:`<div class="w-1.5 h-1.5 mt-0.5"></div>`}
+        </button>`;
+      }).join("")}
+    </div>
   </div>
 
-  <!-- Day header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div>
-      <div style="font-size:16px;font-weight:700;color:var(--txt)">${fmtDayFull(dietViewDate)}</div>
-      <div style="font-size:12px;color:var(--mut);margin-top:2px">${entries.length} item${entries.length!==1?"s":""} logged</div>
+  <!-- Day summary card - ring + macros like design 2 -->
+  <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+    <div class="flex items-center gap-5">
+      <div class="relative w-28 h-28 flex-shrink-0">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+          <circle class="stroke-slate-100" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.5"/>
+          <circle cx="18" cy="18" fill="none" r="15.9155"
+            stroke="${ringColor}"
+            stroke-dasharray="${pct},100"
+            stroke-linecap="round" stroke-width="3.5"/>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span class="text-xl font-black leading-none" style="color:${ringColor}">${tot.cal}</span>
+          <span class="text-[8px] text-slate-400 uppercase font-bold mt-0.5">kcal</span>
+        </div>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-slate-700 mb-1">${fmtDayFull(dietViewDate)}</p>
+        <p class="text-xs text-slate-400 mb-2">${target-tot.cal>0?`${target-tot.cal} kcal remaining`:`${tot.cal-target} kcal over`} · ${target} target</p>
+        <div class="grid grid-cols-2 gap-1.5">
+          ${[["Protein",tot.pro.toFixed(1),"g","bg-blue-50 text-blue-600"],["Carbs",tot.carb.toFixed(1),"g","bg-amber-50 text-amber-600"],["Net Carbs",nc.toFixed(1),"g","bg-purple-50 text-purple-600"],["Fat",tot.fat.toFixed(1),"g","bg-red-50 text-red-500"]].map(([l,v,u,cls])=>`
+          <div class="${cls} rounded-xl px-2 py-1.5 text-center">
+            <div class="text-sm font-bold">${v}${u}</div>
+            <div class="text-[8px] font-bold uppercase opacity-70">${l}</div>
+          </div>`).join("")}
+        </div>
+      </div>
     </div>
-    ${isToday?`<button class="btn bp sm" onclick="showAddToDietModal()">+ Add Item</button>`:""}
   </div>
 
-  <!-- Calorie progress -->
-  <div class="card" style="background:linear-gradient(135deg,var(--acc-light),rgba(52,199,89,.06))">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
-      <span style="font-size:32px;font-weight:700;color:var(--acc);letter-spacing:-1px">${tot.cal}</span>
-      <span style="font-size:13px;color:var(--mut)">/ ${target} kcal</span>
+  <!-- Meals list -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Meals & Items</p>
+      ${isToday?`<button onclick="showAddToDietModal()" class="flex items-center gap-1 bg-primary text-white font-bold py-1.5 px-3 rounded-xl text-xs">
+        <span class="material-symbols-outlined text-sm">add</span>Add Item
+      </button>`:""}
     </div>
-    <div class="progress-wrap"><div class="progress-bar ${barClass}" style="width:${pct}%"></div></div>
-    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--mut)">
-      <span>${target-tot.cal>0?`${target-tot.cal} kcal remaining`:`${tot.cal-target} kcal over`}</span>
-      <span>${pct}% of target</span>
-    </div>
-    <!-- Macro summary -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px">
-      ${[["Protein",tot.pro.toFixed(1),"g","var(--acc)"],["Net Carbs",netCarb.toFixed(1),"g","var(--pur)"],["Fibre",tot.fib.toFixed(1),"g","var(--acc2)"],["Fat",tot.fat.toFixed(1),"g","var(--red)"]].map(([l,v,u,c])=>`
-      <div style="text-align:center;background:rgba(255,255,255,.6);border-radius:10px;padding:8px 4px">
-        <div style="font-size:15px;font-weight:700;color:${c}">${v}${u}</div>
-        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:500;margin-top:2px">${l}</div>
+    ${entries.length===0?`
+    <div class="flex flex-col items-center py-10 text-slate-300 px-4">
+      <span class="material-symbols-outlined text-4xl mb-2">restaurant</span>
+      <span class="text-sm text-slate-400 text-center">${isToday?"Nothing logged yet today.":"No entries for this day."}</span>
+    </div>`:`
+    <div class="divide-y divide-slate-50 px-4">
+      ${entries.map((e,idx)=>`
+      <div class="flex items-center gap-3 py-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${e.type==="recipe"?"bg-orange-50":e.type==="pkg"?"bg-blue-50":"bg-green-50"}">
+          <span class="material-symbols-outlined ${e.type==="recipe"?"text-primary":e.type==="pkg"?"text-blue-500":"text-success"} text-xl">${e.type==="recipe"?"restaurant":e.type==="pkg"?"inventory_2":"eco"}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate">${e.name}</p>
+          <p class="text-xs text-slate-400 mt-0.5">${e.qty}× ${e.portionLabel} · ${(e.pro||0).toFixed(1)}g pro · ${Math.max(0,(e.carb||0)-(e.fib||0)).toFixed(1)}g net C</p>
+        </div>
+        <span class="text-sm font-bold text-primary flex-shrink-0">${e.cal} kcal</span>
+        ${isToday?`<button onclick="removeDietEntry(${idx})" class="w-7 h-7 flex items-center justify-center bg-red-50 text-red-400 rounded-lg text-xs flex-shrink-0">✕</button>`:""}
       </div>`).join("")}
-    </div>
-  </div>
+    </div>`}
+  </div>`;
 
-  <!-- Entries list -->
-  <div class="card">
-    <div class="ct">Meals & Items</div>
-    ${entries.length===0?`<div class="empty"><div class="empty-icon">🍽</div>${isToday?"Nothing logged yet today.<br/>Tap + Add Item to start.":"No entries for this day."}</div>`:`
-    ${entries.map((e,idx)=>`
-      <div class="diet-item">
-        <div class="diet-icon" style="background:${e.type==="recipe"?"var(--acc-light)":e.type==="pkg"?"#fff3e0":"var(--acc2-light)"}">
-          ${e.type==="recipe"?"🍳":e.type==="pkg"?"📦":"🥦"}
-        </div>
-        <div class="diet-info">
-          <div class="diet-name">${e.name}</div>
-          <div class="diet-meta">${e.qty} × ${e.portionLabel} · ${(e.pro||0).toFixed(1)}g protein · ${Math.max(0,(e.carb||0)-(e.fib||0)).toFixed(1)}g net carbs</div>
-        </div>
-        <div class="diet-cal">${e.cal} kcal</div>
-        ${isToday?`<button class="btn br sm" style="flex-shrink:0" onclick="removeDietEntry(${idx})">✕</button>`:""}
-      </div>`).join("")}`}
-  </div>
-
-  ${!isToday&&entries.length===0?`<div style="text-align:center;padding:8px 0"><button class="btn bs sm" onclick="dietViewDate=todayKey();renderDiet()">→ Go to Today</button></div>`:""}`;
-
-  // Scroll to today pill
-  const todayPill=document.querySelector(".day-pill.on");
-  if(todayPill) todayPill.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  // Scroll today pill into view
+  const todayPill=document.querySelector(".day-pill-btn.active");
+  if(todayPill)setTimeout(()=>todayPill.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}),100);
 }
 
 function removeDietEntry(idx){
-  const entries=getDay(dietViewDate);
-  entries.splice(idx,1);
-  setDay(dietViewDate,entries);
-  renderDiet();
+  const e=getDay(dietViewDate);e.splice(idx,1);setDay(dietViewDate,e);renderDiet();
 }
 
 function showAddToDietModal(){
-  const m=document.getElementById("modal");
-  m.style.display="flex"; m.className="modal-overlay";
   const lib=allIngs();
-  m.innerHTML=`<div class="modal">
-    <div class="modal-handle"></div>
-    <div style="font-size:18px;font-weight:700;margin-bottom:16px">Add to Today's Diet</div>
+  showModal(`
+    <div class="modal-handle w-9 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+    <h3 class="text-lg font-bold mb-1">Add to Today's Diet</h3>
+    <p class="text-sm text-slate-400 mb-4">Choose a recipe or ingredient to log</p>
 
-    <!-- Recipes section -->
-    ${DB.recipes.length?`<div class="sdiv">🍳 Recipes</div>
-    ${DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card2);border-radius:10px;margin-bottom:6px">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rec.name}</div>
-        <div style="font-size:11px;color:var(--mut);margin-top:2px">${t.cal} kcal · ${t.pro}g protein</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <input type="number" id="rqty_${rec.id}" min=".5" step=".5" value="1" style="width:52px;padding:6px 8px;border:1.5px solid var(--bor);border-radius:8px;font-size:13px;font-weight:600;text-align:center;background:var(--sur);color:var(--txt);font-family:'Inter',sans-serif" oninput="updateRecipeQtyLabel('${rec.id}',${t.cal})"/>
-        <span style="font-size:11px;color:var(--mut)">srv</span>
-        <button class="btn bp sm" onclick="addRecipeToDietFromModal('${rec.id}')">Add</button>
-      </div>
-    </div>`;}).join("")}`:""}
+    ${DB.recipes.length?`
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">🍳 Recipes</p>
+    <div class="space-y-2 mb-4">
+      ${DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
+      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate">${rec.name}</p>
+          <p class="text-xs text-slate-400">${t.cal} kcal · ${t.pro}g protein</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <input type="number" id="rqty_${rec.id}" min=".5" step=".5" value="1"
+            class="w-14 bg-white border-[1.5px] border-slate-200 rounded-xl p-2 text-sm font-bold text-center outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+          <span class="text-xs text-slate-400">srv</span>
+          <button onclick="addRecipeToDietFromModal('${rec.id}')" class="bg-primary text-white font-bold py-2 px-3 rounded-xl text-xs">Add</button>
+        </div>
+      </div>`;}).join("")}
+    </div>`:""}
 
-    <!-- Individual ingredients section -->
-    ${lib.length?`<div class="sdiv" style="margin-top:12px">🥦📦 Ingredients</div>
-    ${lib.map(ing=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card2);border-radius:10px;margin-bottom:6px">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ing.label}</div>
-        <div style="font-size:11px;color:var(--mut);margin-top:2px">${ing.cal} kcal/portion · ${(ing.pro||0).toFixed(1)}g protein</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <input type="number" id="iqty_${ing.id}" min=".1" step=".1" value="1" style="width:52px;padding:6px 8px;border:1.5px solid var(--bor);border-radius:8px;font-size:13px;font-weight:600;text-align:center;background:var(--sur);color:var(--txt);font-family:'Inter',sans-serif"/>
-        <span style="font-size:11px;color:var(--mut)">×</span>
-        <button class="btn bg2 sm" onclick="addIngToDiet('${ing.id}')">Add</button>
-      </div>
-    </div>`).join("")}`:""}
+    ${lib.length?`
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">🥦📦 Ingredients</p>
+    <div class="space-y-2 mb-4">
+      ${lib.map(ing=>`
+      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate">${ing.label}</p>
+          <p class="text-xs text-slate-400">${ing.cal} kcal · ${(ing.pro||0).toFixed(1)}g protein</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <input type="number" id="iqty_${ing.id}" min=".1" step=".1" value="1"
+            class="w-14 bg-white border-[1.5px] border-slate-200 rounded-xl p-2 text-sm font-bold text-center outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+          <span class="text-xs text-slate-400">×</span>
+          <button onclick="addIngToDiet('${ing.id}')" class="bg-success text-white font-bold py-2 px-3 rounded-xl text-xs">Add</button>
+        </div>
+      </div>`).join("")}
+    </div>`:""}
 
-    ${(!DB.recipes.length&&!lib.length)?`<div class="empty">No ingredients or recipes yet.<br/>Add some in the other tabs first.</div>`:""}
+    ${!DB.recipes.length&&!lib.length?`<p class="text-sm text-slate-400 text-center py-6">No ingredients or recipes yet.<br/>Add some in the other tabs first.</p>`:""}
 
-    <button class="btn bs" style="width:100%;justify-content:center;margin-top:14px" onclick="document.getElementById('modal').style.display='none'">Done</button>
-  </div>`;
+    <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm">Done</button>
+  `);
 }
 
 function addRecipeToDietFromModal(recId){
-  const rec=DB.recipes.find(r=>String(r.id)===String(recId));
-  if(!rec) return;
+  const rec=DB.recipes.find(r=>String(r.id)===String(recId));if(!rec)return;
   const qty=parseFloat(document.getElementById(`rqty_${recId}`)?.value)||1;
   const t=calcTotals(rec.ingredients,qty);
-  const entries=getDay(todayKey());
-  entries.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",addedAt:new Date().toISOString()});
-  setDay(todayKey(),entries);
-  toast(`✓ Added ${rec.name} (${t.cal} kcal)`);
+  const e=getDay(todayKey());
+  e.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",addedAt:new Date().toISOString()});
+  setDay(todayKey(),e);toast(`✓ Added ${rec.name} (${t.cal} kcal)`);
 }
-
 function addIngToDiet(ingId){
-  const lib=allIngs();
-  const ing=lib.find(a=>a.id===String(ingId));
-  if(!ing) return;
+  const lib=allIngs();const ing=lib.find(a=>a.id===String(ingId));if(!ing)return;
   const qty=parseFloat(document.getElementById(`iqty_${ingId}`)?.value)||1;
-  const entries=getDay(todayKey());
-  entries.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,addedAt:new Date().toISOString()});
-  setDay(todayKey(),entries);
-  toast(`✓ Added ${ing.label} (${Math.round(ing.cal*qty)} kcal)`);
+  const e=getDay(todayKey());
+  e.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,addedAt:new Date().toISOString()});
+  setDay(todayKey(),e);toast(`✓ Added ${ing.label} (${Math.round(ing.cal*qty)} kcal)`);
 }
-
 function addRecipeToDiet(recId){
-  document.getElementById("modal").style.display="none";
-  showAddToDietModal();
-  // scroll to recipe
-  setTimeout(()=>{
-    const el=document.getElementById(`rqty_${recId}`);
-    if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
-  },100);
+  closeModal();showAddToDietModal();
+  setTimeout(()=>{const el=document.getElementById(`rqty_${recId}`);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);
 }
 
-
-// ════════════════════════════════════════════════════════════════════
-// ── PROFILE MANAGEMENT ───────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════
-const PROFILE_EMOJIS = ["😊","💪","🧘","🏃","👩","👨","👧","👦","🧑","👴","👵","🤸","🍎","🥗","⭐","🌟","🦁","🐯","🐻","🦊"];
+// ════════════════════════════════════════════════════════
+// PROFILE MANAGEMENT
+// ════════════════════════════════════════════════════════
+const PROFILE_EMOJIS=["😊","💪","🧘","🏃","👩","👨","👧","👦","🧑","👴","👵","🤸","🍎","🥗","⭐","🌟","🦁","🐯","🐻","🦊"];
 
 function showProfileModal(){
-  const m = document.getElementById("modal");
-  m.style.display = "flex"; m.className = "modal-overlay";
   renderProfileModal();
 }
-
 function renderProfileModal(){
-  const m = document.getElementById("modal");
-  const profiles = DB.profiles||[];
-  const active = DB.activeProfile;
-  m.innerHTML = `<div class="modal">
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="font-size:18px;font-weight:700;color:var(--txt)">Family Profiles</div>
-      <button onclick="showAddProfileForm()" style="padding:7px 14px;background:var(--acc);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">+ Add</button>
+  const profiles=DB.profiles||[];const active=DB.activeProfile;
+  showModal(`
+    <div class="modal-handle w-9 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold">Family Profiles</h3>
+      <button onclick="showAddProfileForm()" class="flex items-center gap-1 bg-primary text-white font-bold py-1.5 px-3 rounded-xl text-xs">
+        <span class="material-symbols-outlined text-sm">add</span>Add
+      </button>
     </div>
-
-    <div id="profile-list">
-      ${profiles.map(p => {
-        const days = Object.keys(p.dailyDiet||{}).length;
-        const todayEntries = (p.dailyDiet||{})[todayKey()]||[];
-        const todayCal = todayEntries.reduce((s,e)=>s+e.cal,0);
-        const isActive = p.id === active;
-        return `<div onclick="switchProfile('${p.id}')" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:${isActive?"2px solid var(--acc)":"1.5px solid var(--bor)"};background:${isActive?"var(--acc-light)":"var(--card2)"};margin-bottom:10px;cursor:pointer;transition:all .15s">
-          <div style="width:50px;height:50px;border-radius:50%;background:${isActive?"var(--acc)":"var(--bor)"};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${p.emoji||"😊"}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:16px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:8px">
-              ${p.name}
-              ${isActive?`<span style="font-size:10px;background:var(--acc);color:#fff;padding:2px 8px;border-radius:20px;font-weight:600">Active</span>`:""}
+    <div id="profile-list" class="space-y-2 mb-4">
+      ${profiles.map(p=>{
+        const days=Object.keys(p.dailyDiet||{}).length;
+        const todayCal=((p.dailyDiet||{})[todayKey()]||[]).reduce((s,e)=>s+e.cal,0);
+        const isActive=p.id===active;
+        return`<div onclick="switchProfile('${p.id}')" class="flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${isActive?"border-primary bg-orange-50":"border-slate-200 bg-slate-50"}">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${isActive?"bg-primary":"bg-slate-200"}">${p.emoji||"😊"}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm">${p.name}</span>
+              ${isActive?`<span class="text-[9px] bg-primary text-white px-2 py-0.5 rounded-full font-bold">Active</span>`:""}
             </div>
-            <div style="font-size:12px;color:var(--mut);margin-top:3px">
-              ${p.calorieTarget||2000} kcal target · ${days} day${days!==1?"s":""} logged
-              ${todayCal>0?` · <strong style="color:var(--acc)">${todayCal} kcal today</strong>`:""}
-            </div>
+            <p class="text-xs text-slate-400 mt-0.5">${p.calorieTarget||2000} kcal target · ${days} days
+              ${todayCal>0?` · <strong class="text-primary">${todayCal} kcal today</strong>`:""}</p>
           </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            <button onclick="event.stopPropagation();showEditProfile('${p.id}')" style="padding:6px 10px;background:var(--sur);border:1px solid var(--bor);border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--txt2)">Edit</button>
-            ${profiles.length>1?`<button onclick="event.stopPropagation();deleteProfile('${p.id}')" style="padding:6px 10px;background:var(--red-light);border:1px solid rgba(255,59,48,.2);border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--red)">✕</button>`:""}
+          <div class="flex gap-1.5 flex-shrink-0">
+            <button onclick="event.stopPropagation();showEditProfile('${p.id}')" class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600">Edit</button>
+            ${profiles.length>1?`<button onclick="event.stopPropagation();deleteProfile('${p.id}')" class="px-2.5 py-1.5 bg-red-50 border border-red-100 rounded-lg text-xs font-bold text-red-400">✕</button>`:""}
           </div>
         </div>`;
       }).join("")}
     </div>
-
     <div id="profile-form" style="display:none"></div>
-
-    <button class="btn bs" style="width:100%;justify-content:center;margin-top:8px" onclick="document.getElementById('modal').style.display='none'">Done</button>
-  </div>`;
+    <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm">Done</button>
+  `);
 }
-
 function showAddProfileForm(editId){
-  const editing = editId ? DB.profiles.find(p=>p.id===editId) : null;
-  const formEl = document.getElementById("profile-form");
-  const listEl = document.getElementById("profile-list");
-  if(listEl) listEl.style.display="none";
+  const editing=editId?DB.profiles.find(p=>p.id===editId):null;
+  const formEl=document.getElementById("profile-form");
+  const listEl=document.getElementById("profile-list");
+  if(listEl)listEl.style.display="none";
+  const doneBtn=document.querySelector("#modal-root .modal-box button:last-child");
+  if(doneBtn)doneBtn.style.display="none";
   if(formEl){
     formEl.style.display="block";
-    formEl.innerHTML = `
-      <div style="margin-bottom:16px">
-        <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:12px">${editing?"Edit Profile":"New Profile"}</div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;margin-bottom:8px">Name</div>
-        <input id="pname" class="inp" placeholder="e.g. Sarah, Dad, Mum…" value="${editing?editing.name:""}" style="margin-bottom:14px"/>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;margin-bottom:8px">Daily Calorie Target</div>
-        <input id="ptarget" class="inp" type="number" placeholder="e.g. 1800" value="${editing?editing.calorieTarget:""}" style="margin-bottom:14px"/>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;margin-bottom:10px">Choose Emoji</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
-          ${PROFILE_EMOJIS.map(e=>`<div onclick="selectEmoji('${e}')" id="emoji_${e}" style="width:40px;height:40px;border-radius:10px;border:${(editing?editing.emoji:PROFILE_EMOJIS[0])===e?"2px solid var(--acc)":"1.5px solid var(--bor)"};display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:all .15s;background:${(editing?editing.emoji:PROFILE_EMOJIS[0])===e?"var(--acc-light)":"var(--card2)"}">${e}</div>`).join("")}
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn bp" style="flex:1;justify-content:center" onclick="saveProfile(${editId?`'${editId}'`:null})">${editing?"Save Changes":"Create Profile"}</button>
-          <button class="btn bs" onclick="document.getElementById('profile-list').style.display='block';document.getElementById('profile-form').style.display='none'">Cancel</button>
-        </div>
+    window._selectedEmoji=editing?editing.emoji:PROFILE_EMOJIS[0];
+    formEl.innerHTML=`
+      <p class="text-base font-bold mb-4">${editing?"Edit Profile":"New Profile"}</p>
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Name</label>
+      <input id="pname" placeholder="e.g. Sarah, Dad…" value="${editing?editing.name:""}"
+        class="w-full mt-1 mb-3 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Calorie Target</label>
+      <input id="ptarget" type="number" placeholder="e.g. 1800" value="${editing?editing.calorieTarget:""}"
+        class="w-full mt-1 mb-3 bg-slate-50 border-[1.5px] border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
+      <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Choose Emoji</label>
+      <div class="flex flex-wrap gap-2 mb-4">
+        ${PROFILE_EMOJIS.map(e=>`<button type="button" onclick="selectEmoji('${e}')" id="emoji_${e}"
+          class="w-10 h-10 rounded-xl border-[1.5px] text-xl flex items-center justify-center transition-all ${(editing?editing.emoji:PROFILE_EMOJIS[0])===e?"border-primary bg-orange-50":"border-slate-200 bg-slate-50"}">${e}</button>`).join("")}
+      </div>
+      <div class="flex gap-2">
+        <button onclick="saveProfile(${editId?`'${editId}'`:null})" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl text-sm">${editing?"Save Changes":"Create Profile"}</button>
+        <button onclick="renderProfileModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm">Cancel</button>
       </div>`;
-    // Set selected emoji
-    window._selectedEmoji = editing ? editing.emoji : PROFILE_EMOJIS[0];
   }
 }
-
 function showEditProfile(id){showAddProfileForm(id);}
-
 function selectEmoji(e){
-  window._selectedEmoji = e;
+  window._selectedEmoji=e;
   document.querySelectorAll("[id^='emoji_']").forEach(el=>{
-    const isSelected = el.id === `emoji_${e}`;
-    el.style.border = isSelected ? "2px solid var(--acc)" : "1.5px solid var(--bor)";
-    el.style.background = isSelected ? "var(--acc-light)" : "var(--card2)";
+    const on=el.id===`emoji_${e}`;
+    el.className=el.className.replace(/border-primary|border-slate-200|bg-orange-50|bg-slate-50/g,"");
+    el.className+=on?" border-primary bg-orange-50":" border-slate-200 bg-slate-50";
   });
 }
-
 function saveProfile(editId){
-  const name = (document.getElementById("pname")?.value||"").trim();
-  const target = parseInt(document.getElementById("ptarget")?.value)||2000;
-  const emoji = window._selectedEmoji || PROFILE_EMOJIS[0];
+  const name=(document.getElementById("pname")?.value||"").trim();
+  const target=parseInt(document.getElementById("ptarget")?.value)||2000;
+  const emoji=window._selectedEmoji||PROFILE_EMOJIS[0];
   if(!name){toast("Enter a name for this profile","e");return;}
-  if(!DB.profiles) DB.profiles=[];
-  if(editId){
-    const p = DB.profiles.find(p=>p.id===editId);
-    if(p){p.name=name;p.calorieTarget=target;p.emoji=emoji;}
-  } else {
-    const id = "p_"+Date.now();
-    DB.profiles.push({id,name,emoji,calorieTarget:target,dailyDiet:{},createdAt:new Date().toISOString()});
-    if(DB.profiles.length===1) DB.activeProfile=id;
-  }
-  saveDB();
-  toast(editId?"✓ Profile updated":"✓ Profile created — tap to switch");
-  renderProfileModal();
+  if(!DB.profiles)DB.profiles=[];
+  if(editId){const p=DB.profiles.find(p=>p.id===editId);if(p){p.name=name;p.calorieTarget=target;p.emoji=emoji;}}
+  else{const id="p_"+Date.now();DB.profiles.push({id,name,emoji,calorieTarget:target,dailyDiet:{},createdAt:new Date().toISOString()});if(DB.profiles.length===1)DB.activeProfile=id;}
+  saveDB();toast(editId?"✓ Profile updated":"✓ Profile created");renderProfileModal();
 }
-
 function switchProfile(id){
-  DB.activeProfile = id;
-  dietViewDate = todayKey(); // reset to today when switching
-  saveDB();
-  document.getElementById("modal").style.display="none";
-  toast(`✓ Switched to ${DB.profiles.find(p=>p.id===id)?.name||"profile"}`);
-  render();
+  DB.activeProfile=id;dietViewDate=todayKey();saveDB();
+  closeModal();toast(`✓ Switched to ${DB.profiles.find(p=>p.id===id)?.name||"profile"}`);render();
 }
-
 function deleteProfile(id){
   if(DB.profiles.length<=1){toast("Can't delete the only profile","e");return;}
-  const p = DB.profiles.find(x=>x.id===id);
-  if(!confirm(`Delete ${p?.name||"this profile"} and all their diet history?`)) return;
-  DB.profiles = DB.profiles.filter(x=>x.id!==id);
-  if(DB.activeProfile===id) DB.activeProfile=DB.profiles[0]?.id;
-  saveDB();
-  toast("Profile deleted");
-  renderProfileModal();
+  const p=DB.profiles.find(x=>x.id===id);
+  if(!confirm(`Delete ${p?.name||"this profile"} and all their diet history?`))return;
+  DB.profiles=DB.profiles.filter(x=>x.id!==id);
+  if(DB.activeProfile===id)DB.activeProfile=DB.profiles[0]?.id;
+  saveDB();toast("Profile deleted");renderProfileModal();
 }
 
-// ── After-render hooks ────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// AFTER RENDER
+// ════════════════════════════════════════════════════════
 function bindAfterRender(){
   if(recMode==="create"){
     document.querySelectorAll("#recings select").forEach((sel,i)=>{if(recIng[i]?.ingredientId)sel.value=recIng[i].ingredientId;});
   }
 }
 
-// ── Service Worker ────────────────────────────────────────────────────────────
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("/sw.js")
-    .then(r=>console.log("SW:",r.scope)).catch(e=>console.log("SW err:",e));
-}
+// ════════════════════════════════════════════════════════
+// SERVICE WORKER
+// ════════════════════════════════════════════════════════
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}
 
-// ── iOS install banner ────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// iOS INSTALL BANNER
+// ════════════════════════════════════════════════════════
 function showInstallBanner(){
   const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
   const isSafari=/safari/i.test(navigator.userAgent)&&!/chrome/i.test(navigator.userAgent);
-  const isStandalone=window.navigator.standalone===true;
-  if(!isIOS||!isSafari||isStandalone||localStorage.getItem("install_dismissed")) return;
+  if(!isIOS||!isSafari||navigator.standalone||localStorage.getItem("install_dismissed"))return;
   const banner=document.createElement("div");
-  banner.style.cssText=`position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bor);padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));z-index:500;display:flex;align-items:center;gap:12px;animation:su .3s ease;box-shadow:0 -4px 20px rgba(0,0,0,.1)`;
-  banner.innerHTML=`
-    <img src="/icon-60.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"/>
-    <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:var(--txt)">Add to Home Screen</div>
-    <div style="font-size:12px;color:var(--mut);margin-top:2px">Tap <strong style="color:var(--txt)">Share</strong> → <strong style="color:var(--txt)">Add to Home Screen</strong></div></div>
-    <button onclick="this.closest('div').remove();localStorage.setItem('install_dismissed','1')" style="border:none;background:transparent;color:var(--mut2);font-size:22px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0">×</button>`;
+  banner.style.cssText="position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);border-top:1px solid #e2e8f0;padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));z-index:500;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.08)";
+  banner.innerHTML=`<img src="/icon-60.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"/>
+    <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;font-family:'Public Sans',sans-serif">Add to Home Screen</div>
+    <div style="font-size:12px;color:#64748b;margin-top:2px;font-family:'Public Sans',sans-serif">Tap Share → Add to Home Screen</div></div>
+    <button onclick="this.closest('div').remove();localStorage.setItem('install_dismissed','1')" style="border:none;background:transparent;color:#94a3b8;font-size:22px;cursor:pointer;flex-shrink:0">×</button>`;
   document.body.appendChild(banner);
 }
 
-// ── Auto-reset today's diet at midnight ──────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// MIDNIGHT RESET
+// ════════════════════════════════════════════════════════
 function checkMidnightReset(){
   migrateToProfiles();
-  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-30);
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
   const cutKey=cutoff.toISOString().split("T")[0];
-  // Prune old entries from all profiles
   (DB.profiles||[]).forEach(p=>{
-    if(!p.dailyDiet) p.dailyDiet={};
-    Object.keys(p.dailyDiet).forEach(k=>{ if(k<cutKey) delete p.dailyDiet[k]; });
+    if(!p.dailyDiet)p.dailyDiet={};
+    Object.keys(p.dailyDiet).forEach(k=>{if(k<cutKey)delete p.dailyDiet[k];});
   });
   saveDB();
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
 (async()=>{
-  document.getElementById("page").innerHTML=`<div style="text-align:center;padding:80px;color:var(--mut);font-size:14px"><div class="spin" style="margin:0 auto 16px;border-top-color:var(--acc)"></div>Loading…</div>`;
+  document.getElementById("page").innerHTML=`
+    <div class="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <span class="material-symbols-outlined text-primary text-5xl">local_fire_department</span>
+      <div class="flex items-center gap-2 text-slate-400 text-sm"><div class="spin"></div>Loading CaloriTrack…</div>
+    </div>`;
   await loadDB();
   checkMidnightReset();
   render();
   setTimeout(showInstallBanner,3000);
-  // Sync from server every 30s
   setInterval(async()=>{
-    try{
-      const r=await fetch("/api/data"); if(!r.ok) return;
-      const fresh=await r.json();
-      if(JSON.stringify(fresh)!==JSON.stringify(DB)){ DB={...DB,...fresh}; render(); }
-    }catch{}
+    try{const r=await fetch("/api/data");if(!r.ok)return;const fresh=await r.json();if(JSON.stringify(fresh)!==JSON.stringify(DB)){DB={...DB,...fresh};render();}}catch{}
   },30000);
 })();
 </script>
