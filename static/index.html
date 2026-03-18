@@ -39,7 +39,7 @@ body{font-family:'Public Sans',sans-serif;background:#f8f6f6;color:#1e293b;min-h
 
 /* Ingredient input rows */
 .ing-row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
-.ing-row input,.ing-row select{font-family:'Public Sans',sans-serif;font-size:15px;background:#f8f6f6;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;color:#1e293b;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.ing-row input,.ing-row select{font-family:'Public Sans',sans-serif;font-size:16px;background:#f8f6f6;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 10px;color:#1e293b;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none;min-width:0;width:100%}
 .ing-row input:focus,.ing-row select:focus{border-color:#ec5b13;background:#fff}
 .ing-row input::placeholder{color:#94a3b8}
 
@@ -63,7 +63,7 @@ body{font-family:'Public Sans',sans-serif;background:#f8f6f6;color:#1e293b;min-h
 
 /* Table */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border-radius:12px;border:1px solid #e2e8f0}
-.tbl{border-collapse:collapse;width:100%;min-width:540px}
+.tbl{border-collapse:collapse;width:100%;min-width:560px;table-layout:auto}
 .tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;padding:10px 12px;border-bottom:1px solid #e2e8f0;font-weight:700;background:#f8fafc}
 .tbl td{padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
@@ -312,10 +312,19 @@ function dashHTML(){
           <span class="text-sm font-medium text-slate-400">${target-todayCal>0?`${(target-todayCal).toLocaleString()} kcal left`:"Over target"}</span>
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-6 w-full mb-6">
-        <div class="flex flex-col"><span class="text-xs font-bold text-accent-pink uppercase tracking-wider">Carbs</span><span class="text-lg font-bold">${todayCarb.toFixed(0)}g</span></div>
-        <div class="flex flex-col"><span class="text-xs font-bold text-accent-blue uppercase tracking-wider">Protein</span><span class="text-lg font-bold">${todayPro.toFixed(0)}g</span></div>
-        <div class="flex flex-col"><span class="text-xs font-bold text-accent-orange uppercase tracking-wider">Fat</span><span class="text-lg font-bold">${todayFat.toFixed(0)}g</span></div>
+      <div class="grid grid-cols-3 gap-3 w-full mb-5" style="max-width:100%">
+        <div class="flex flex-col items-center bg-pink-50 rounded-2xl py-2.5 px-1 min-w-0">
+          <span style="font-size:9px;font-weight:700;color:#ec4899;text-transform:uppercase;letter-spacing:.5px">Carbs</span>
+          <span style="font-size:16px;font-weight:800;color:#1e293b;white-space:nowrap">${todayCarb.toFixed(0)}g</span>
+        </div>
+        <div class="flex flex-col items-center bg-blue-50 rounded-2xl py-2.5 px-1 min-w-0">
+          <span style="font-size:9px;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.5px">Protein</span>
+          <span style="font-size:16px;font-weight:800;color:#1e293b;white-space:nowrap">${todayPro.toFixed(0)}g</span>
+        </div>
+        <div class="flex flex-col items-center bg-orange-50 rounded-2xl py-2.5 px-1 min-w-0">
+          <span style="font-size:9px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:.5px">Fat</span>
+          <span style="font-size:16px;font-weight:800;color:#1e293b;white-space:nowrap">${todayFat.toFixed(0)}g</span>
+        </div>
       </div>
       <button onclick="navigate('diet')" class="w-full bg-primary text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform text-sm">
         Open Daily Diet
@@ -326,14 +335,14 @@ function dashHTML(){
   <!-- Stats grid -->
   <div class="grid grid-cols-2 gap-3">
     ${[["package_2","text-accent-blue","bg-blue-50",DB.ingredients.length,"Packaged"],
-       ["eco","text-success","bg-green-50",DB.rawIngredients.length,"Raw Ingredients"],
+       ["eco","text-success","bg-green-50",DB.rawIngredients.length,"Raw Ingr."],
        ["menu_book","text-accent-pink","bg-pink-50",DB.recipes.length,"Recipes"],
        ["event_available","text-accent-orange","bg-orange-50",Object.keys(profileDiet()).length,"Diet Days"]
     ].map(([icon,col,bg,val,lbl])=>`
-    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
-      <span class="material-symbols-outlined ${col} ${bg} p-2 rounded-xl mb-2 text-2xl">${icon}</span>
-      <span class="text-2xl font-bold">${val}</span>
-      <span class="text-xs font-medium text-slate-400 mt-0.5">${lbl}</span>
+    <div style="background:#fff;padding:16px 8px;border-radius:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #f1f5f9;display:flex;flex-direction:column;align-items:center;overflow:hidden">
+      <span class="material-symbols-outlined ${col} ${bg}" style="padding:8px;border-radius:12px;margin-bottom:8px;font-size:22px">${icon}</span>
+      <span style="font-size:22px;font-weight:800;color:#1e293b;line-height:1">${val}</span>
+      <span style="font-size:10px;font-weight:500;color:#94a3b8;margin-top:4px;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">${lbl}</span>
     </div>`).join("")}
   </div>
 
@@ -344,15 +353,15 @@ function dashHTML(){
     </div>
     <div class="space-y-2">
       ${top.map((item,idx)=>`
-      <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full font-bold text-sm text-slate-600">${idx+1}</div>
-          <div>
-            <p class="font-bold text-sm">${item.name||item.productName}</p>
-            <p class="text-xs text-slate-400">${item.quantity?item.quantity+item.unit:item.servingSize||""}</p>
+      <div style="background:#fff;padding:12px 16px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;border:1px solid #f1f5f9;box-shadow:0 1px 3px rgba(0,0,0,.04);gap:12px">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+          <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;border-radius:50%;font-weight:700;font-size:13px;color:#475569;flex-shrink:0">${idx+1}</div>
+          <div style="min-width:0;overflow:hidden">
+            <p style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${item.name||item.productName}</p>
+            <p style="font-size:11px;color:#94a3b8;margin-top:1px">${item.quantity?item.quantity+item.unit:item.servingSize||""}</p>
           </div>
         </div>
-        <span class="font-bold text-primary text-sm">${Math.round(item.caloriesTotal)} kcal</span>
+        <span style="font-weight:700;color:#ec5b13;font-size:13px;flex-shrink:0;white-space:nowrap">${Math.round(item.caloriesTotal)} kcal</span>
       </div>`).join("")}
     </div>
   </section>`:""}
@@ -365,13 +374,13 @@ function dashHTML(){
     </div>
     <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
       ${recent.map(rec=>{const t=calcTotals(rec.ingredients);return`
-      <div onclick="openRecipe('${rec.id}')" class="flex-none w-44 bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm cursor-pointer active:scale-95 transition-transform">
-        <div class="w-full h-28 bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center">
-          <span class="material-symbols-outlined text-5xl text-primary/40">restaurant</span>
+      <div onclick="openRecipe('${rec.id}')" style="flex:none;width:160px;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s" ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
+        <div style="width:100%;height:100px;background:linear-gradient(135deg,#ffedd5,#fef3c7);display:flex;align-items:center;justify-content:center">
+          <span class="material-symbols-outlined" style="font-size:40px;color:rgba(236,91,19,.35)">restaurant</span>
         </div>
-        <div class="p-3">
-          <p class="font-bold text-sm truncate">${rec.name}</p>
-          <p class="text-xs text-success font-medium mt-0.5">${t.cal} kcal</p>
+        <div style="padding:10px 12px">
+          <p style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${rec.name}</p>
+          <p style="font-size:12px;color:#22c55e;font-weight:600;margin-top:2px">${t.cal} kcal</p>
         </div>
       </div>`;}).join("")}
     </div>
@@ -381,36 +390,38 @@ function dashHTML(){
   <section>
     <h3 class="text-lg font-bold mb-3">Quick Actions</h3>
     <div class="space-y-2">
-      ${[["qr_code_scanner","bg-orange-50","text-primary","scan","Scan Label","Camera or photo → AI reads nutrition label"],
-         ["edit_note","bg-green-50","text-success","raw","Log Ingredients","Enter foods to look up USDA calorie data"],
-         ["cooking","bg-blue-50","text-accent-blue","recipes","Build Recipe","Combine ingredients with serving size"]
+      ${[["qr_code_scanner","bg-orange-50","text-primary","scan","Scan Label","Camera or photo → AI reads labels"],
+         ["edit_note","bg-green-50","text-success","raw","Log Ingredients","Enter foods → USDA calorie data"],
+         ["cooking","bg-blue-50","text-accent-blue","recipes","Build Recipe","Combine ingredients with servings"]
       ].map(([icon,bg,col,tab,title,desc])=>`
-      <button onclick="navigate('${tab}')" class="w-full bg-white p-4 rounded-2xl flex items-center gap-4 border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors active:scale-[.98]">
-        <div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center ${col} flex-shrink-0">
+      <button onclick="navigate('${tab}')" style="width:100%;background:#fff;padding:14px 16px;border-radius:16px;display:flex;align-items:center;gap:12px;border:1px solid #f1f5f9;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:transform .1s;margin-bottom:4px" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
+        <div class="${bg} ${col} flex-shrink-0" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center">
           <span class="material-symbols-outlined">${icon}</span>
         </div>
-        <div class="text-left min-w-0">
-          <span class="font-bold text-sm block">${title}</span>
-          <span class="text-xs text-slate-400">${desc}</span>
+        <div style="flex:1;min-width:0">
+          <span style="font-weight:700;font-size:14px;display:block;color:#1e293b">${title}</span>
+          <span style="font-size:11px;color:#94a3b8;display:block;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</span>
         </div>
-        <span class="material-symbols-outlined ml-auto text-slate-300">chevron_right</span>
+        <span class="material-symbols-outlined flex-shrink-0" style="color:#cbd5e1">chevron_right</span>
       </button>`).join("")}
     </div>
   </section>
 
   <!-- Daily Targets footer -->
-  <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm mb-2">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-sm">Daily Targets</h3>
-      <button onclick="showTargetModal()" class="material-symbols-outlined text-slate-400 text-xl">settings</button>
+  <div style="background:#fff;border-radius:24px;padding:18px 16px;border:1px solid #f1f5f9;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="font-weight:700;font-size:14px;color:#1e293b">Daily Targets</h3>
+      <button onclick="showTargetModal()" style="border:none;background:none;cursor:pointer;color:#94a3b8">
+        <span class="material-symbols-outlined" style="font-size:20px">settings</span>
+      </button>
     </div>
-    <div class="space-y-3">
-      <div>
-        <div class="flex justify-between text-xs font-bold mb-1 uppercase tracking-tight">
-          <span class="text-slate-400">Calories</span>
-          <span>${todayCal.toLocaleString()} / ${target.toLocaleString()} kcal</span>
-        </div>
-        <div class="h-2 w-full bg-slate-100 rounded-full"><div class="h-2 rounded-full transition-all" style="width:${pct}%;background:${ringColor}"></div></div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px">Calories</span>
+        <span style="font-size:11px;font-weight:700;color:#1e293b">${todayCal.toLocaleString()} / ${target.toLocaleString()} kcal</span>
+      </div>
+      <div style="height:8px;width:100%;background:#f1f5f9;border-radius:999px;overflow:hidden">
+        <div style="height:100%;border-radius:999px;transition:width .4s;width:${pct}%;background:${ringColor}"></div>
       </div>
     </div>
   </div>`;
@@ -653,9 +664,12 @@ function showScanResult(info){
     <span class="text-4xl font-black text-primary">${info.caloriesPerServing}</span>
     <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mt-1">kcal per serving</p>
   </div>
-  <div class="grid grid-cols-5 gap-1.5 mb-3">
-    ${[["Pro",info.protein,"g","bg-blue-50 text-blue-600"],["Carbs",info.carbs,"g","bg-amber-50 text-amber-600"],["Net C",nc.toFixed(1),"g","bg-purple-50 text-purple-600"],["Fibre",fib,"g","bg-green-50 text-green-600"],["Fat",info.fat,"g","bg-red-50 text-red-500"]].map(([l,v,u,cls])=>`
-    <div class="${cls} rounded-xl p-2 text-center"><div class="text-sm font-bold">${v??"-"}${v!=null?u:""}</div><div class="text-[9px] font-bold uppercase mt-0.5 opacity-70">${l}</div></div>`).join("")}
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px">
+    ${[["Pro",info.protein,"g","#eff6ff","#2563eb"],["Carbs",info.carbs,"g","#fffbeb","#d97706"],["Net C",nc.toFixed(1),"g","#f5f3ff","#7c3aed"],["Fibre",fib,"g","#f0fdf4","#16a34a"],["Fat",info.fat,"g","#fff1f2","#e11d48"]].map(([l,v,u,bg,col])=>`
+    <div style="background:${bg};border-radius:10px;padding:8px 4px;text-align:center;overflow:hidden">
+      <div style="font-size:12px;font-weight:700;color:${col};white-space:nowrap">${v??"-"}${v!=null?u:""}</div>
+      <div style="font-size:8px;font-weight:700;text-transform:uppercase;opacity:.7;margin-top:1px;color:${col}">${l}</div>
+    </div>`).join("")}
   </div>
   ${info.ingredients?`<div class="text-[10px] text-slate-400 leading-relaxed p-2 bg-slate-50 rounded-xl"><strong class="text-slate-600">Ingredients: </strong>${info.ingredients}</div>`:""}
   <button onclick="savePackaged()" class="w-full mt-3 bg-primary text-white font-bold py-3 rounded-xl text-sm">+ Save to Library</button>`;
@@ -783,22 +797,20 @@ function renderRecipes(){
   <div class="space-y-3">
     ${DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
     <div onclick="openRecipe('${rec.id}')" class="rec-card">
-      <div class="w-24 h-20 flex-shrink-0 bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center">
-        <span class="material-symbols-outlined text-4xl text-primary/40">restaurant</span>
+      <div class="w-20 h-full flex-shrink-0 bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center self-stretch" style="min-height:72px">
+        <span class="material-symbols-outlined text-3xl text-primary/40">restaurant</span>
       </div>
-      <div class="flex-1 p-3 min-w-0">
-        <p class="font-bold truncate">${rec.name}</p>
-        ${rec.description?`<p class="text-xs text-slate-400 truncate mt-0.5">${rec.description}</p>`:""}
-        <div class="flex items-center gap-3 mt-1.5">
+      <div class="flex-1 p-3 min-w-0 overflow-hidden">
+        <p class="font-bold text-sm leading-tight" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rec.name}</p>
+        ${rec.description?`<p class="text-xs text-slate-400 mt-0.5" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rec.description}</p>`:""}
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1.5">
           <span class="text-xs text-slate-400">${rec.ingredients.length} items</span>
-          <span class="text-xs text-slate-300">·</span>
-          <span class="text-xs text-blue-500 font-medium">${t.pro}g protein</span>
-          <span class="text-xs text-slate-300">·</span>
-          <span class="text-xs text-purple-500 font-medium">${t.netCarb}g net C</span>
+          <span class="text-xs text-blue-500 font-medium">${t.pro}g pro</span>
+          <span class="text-xs text-purple-500 font-medium">${t.netCarb}g net</span>
         </div>
       </div>
-      <div class="px-3 text-right flex-shrink-0">
-        <p class="text-xl font-black text-primary">${t.cal}</p>
+      <div class="px-2 text-right flex-shrink-0">
+        <p class="text-lg font-black text-primary leading-tight">${t.cal}</p>
         <p class="text-[9px] text-slate-400 uppercase font-bold">kcal</p>
       </div>
       <button onclick="event.stopPropagation();delRecipe('${rec.id}')" class="w-8 h-8 mr-2 flex items-center justify-center bg-red-50 text-red-400 rounded-xl text-xs flex-shrink-0">✕</button>
@@ -820,9 +832,10 @@ function renderRecView(){
   </div>
 
   <!-- Ring + macros -->
-  <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
-    <div class="flex items-center gap-5">
-      <div class="relative w-28 h-28 flex-shrink-0">
+  <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+    <p class="text-xs font-bold text-slate-400 text-center mb-3">${recServings} serving${recServings>1?"s":""}</p>
+    <div class="flex items-center gap-4">
+      <div class="relative flex-shrink-0" style="width:100px;height:100px">
         <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
           <circle class="stroke-slate-100" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.5"/>
           <circle class="stroke-primary" cx="18" cy="18" fill="none" r="15.9155"
@@ -830,24 +843,23 @@ function renderRecView(){
             stroke-linecap="round" stroke-width="3.5"/>
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span class="text-xl font-black text-primary leading-none">${tot.cal}</span>
-          <span class="text-[9px] text-slate-400 uppercase font-bold mt-0.5">kcal</span>
+          <span class="font-black text-primary leading-none" style="font-size:18px">${tot.cal}</span>
+          <span class="text-slate-400 uppercase font-bold" style="font-size:8px">kcal</span>
         </div>
       </div>
-      <div class="flex-1">
-        <p class="text-xs font-bold text-slate-500 mb-2">${recServings} serving${recServings>1?"s":""}</p>
-        <div class="grid grid-cols-2 gap-y-2 gap-x-3">
-          ${[["Protein",tot.pro,"g","bg-blue-50 text-blue-600"],["Carbs",tot.carb,"g","bg-amber-50 text-amber-600"],["Net Carbs",tot.netCarb,"g","bg-purple-50 text-purple-600"],["Fat",tot.fat,"g","bg-red-50 text-red-500"]].map(([l,v,u,cls])=>`
-          <div class="${cls} rounded-xl px-2 py-1.5 text-center">
-            <div class="text-sm font-bold">${v}${u}</div>
-            <div class="text-[9px] font-bold uppercase opacity-70">${l}</div>
+      <div style="flex:1;min-width:0">
+        <div class="macro-grid">
+          ${[["Protein",tot.pro,"g","background:#eff6ff;color:#2563eb"],["Carbs",tot.carb,"g","background:#fffbeb;color:#d97706"],["Net Carbs",tot.netCarb,"g","background:#f5f3ff;color:#7c3aed"],["Fat",tot.fat,"g","background:#fff1f2;color:#e11d48"]].map(([l,v,u,sty])=>`
+          <div class="macro-cell" style="${sty}">
+            <div class="macro-val">${v}${u}</div>
+            <div class="macro-lbl">${l}</div>
           </div>`).join("")}
         </div>
-        <div class="flex items-center gap-2 mt-3">
-          <span class="text-xs text-slate-400 font-bold">SERVINGS</span>
+        <div class="flex items-center gap-2 mt-3" style="width:100%">
+          <span class="text-slate-400 font-bold flex-shrink-0" style="font-size:9px;text-transform:uppercase;letter-spacing:.5px">SERVINGS</span>
           <input type="range" min=".5" max="10" step=".5" value="${recServings}"
-            class="flex-1 accent-primary" oninput="recServings=+this.value;renderRecipes()"/>
-          <span class="text-sm font-bold text-primary w-8 text-right">${recServings}×</span>
+            style="flex:1;accent-color:#ec5b13;min-width:0" oninput="recServings=+this.value;renderRecipes()"/>
+          <span class="font-bold text-primary flex-shrink-0" style="font-size:13px;width:28px;text-align:right">${recServings}×</span>
         </div>
       </div>
     </div>
@@ -860,15 +872,15 @@ function renderRecView(){
     </div>
     <div class="divide-y divide-slate-50 px-4">
       ${rec.ingredients.map(ri=>{const ing=lib.find(a=>a.id===String(ri.ingredientId));if(!ing)return"";const pct=tot.cal>0?Math.round(ing.cal*ri.qty*recServings/tot.cal*100):0;return`
-      <div class="flex items-center gap-3 py-3">
-        <div class="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-primary text-lg">${ing.type==="pkg"?"inventory_2":"eco"}</span>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;overflow:hidden">
+        <div style="width:36px;height:36px;border-radius:12px;background:#fff5f0;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <span class="material-symbols-outlined text-primary" style="font-size:18px">${ing.type==="pkg"?"inventory_2":"eco"}</span>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm truncate">${ri.qty}× ${ing.label}</p>
-          <p class="text-xs text-slate-400">${pct}% of total</p>
+        <div style="flex:1;min-width:0;overflow:hidden">
+          <p style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${ri.qty}× ${ing.label}</p>
+          <p style="font-size:11px;color:#94a3b8;margin-top:1px">${pct}% of total</p>
         </div>
-        <span class="text-sm font-bold text-primary flex-shrink-0">${Math.round(ing.cal*ri.qty*recServings)} kcal</span>
+        <span style="font-size:13px;font-weight:700;color:#ec5b13;flex-shrink:0;white-space:nowrap">${Math.round(ing.cal*ri.qty*recServings)} kcal</span>
       </div>`;}).join("")}
     </div>
     <div class="px-4 py-3 bg-slate-50 border-t border-slate-100">
@@ -1022,10 +1034,10 @@ function renderDiet(){
     </div>
   </div>
 
-  <!-- Day summary card - ring + macros like design 2 -->
-  <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
-    <div class="flex items-center gap-5">
-      <div class="relative w-28 h-28 flex-shrink-0">
+  <!-- Day summary card -->
+  <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+    <div class="flex items-center gap-4">
+      <div class="relative flex-shrink-0" style="width:100px;height:100px">
         <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
           <circle class="stroke-slate-100" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.5"/>
           <circle cx="18" cy="18" fill="none" r="15.9155"
@@ -1033,52 +1045,80 @@ function renderDiet(){
             stroke-dasharray="${pct},100"
             stroke-linecap="round" stroke-width="3.5"/>
         </svg>
-        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span class="text-xl font-black leading-none" style="color:${ringColor}">${tot.cal}</span>
-          <span class="text-[8px] text-slate-400 uppercase font-bold mt-0.5">kcal</span>
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
+          <span class="font-black leading-none" style="color:${ringColor};font-size:18px">${tot.cal}</span>
+          <span class="text-slate-400 uppercase font-bold" style="font-size:8px">kcal</span>
         </div>
       </div>
-      <div class="flex-1">
-        <p class="text-sm font-bold text-slate-700 mb-1">${fmtDayFull(dietViewDate)}</p>
-        <p class="text-xs text-slate-400 mb-2">${target-tot.cal>0?`${target-tot.cal} kcal remaining`:`${tot.cal-target} kcal over`} · ${target} target</p>
-        <div class="grid grid-cols-2 gap-1.5">
-          ${[["Protein",tot.pro.toFixed(1),"g","bg-blue-50 text-blue-600"],["Carbs",tot.carb.toFixed(1),"g","bg-amber-50 text-amber-600"],["Net Carbs",nc.toFixed(1),"g","bg-purple-50 text-purple-600"],["Fat",tot.fat.toFixed(1),"g","bg-red-50 text-red-500"]].map(([l,v,u,cls])=>`
-          <div class="${cls} rounded-xl px-2 py-1.5 text-center">
-            <div class="text-sm font-bold">${v}${u}</div>
-            <div class="text-[8px] font-bold uppercase opacity-70">${l}</div>
+      <div style="flex:1;min-width:0">
+        <p class="font-bold text-slate-700 leading-tight mb-0.5" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fmtDayFull(dietViewDate)}</p>
+        <p class="text-slate-400 mb-2" style="font-size:11px">${target-tot.cal>0?`${target-tot.cal} left`:`${tot.cal-target} over`} · ${target} kcal target</p>
+        <div class="macro-grid">
+          ${[["Protein",tot.pro.toFixed(1),"g","background:#eff6ff;color:#2563eb"],["Carbs",tot.carb.toFixed(1),"g","background:#fffbeb;color:#d97706"],["Net Carbs",nc.toFixed(1),"g","background:#f5f3ff;color:#7c3aed"],["Fat",tot.fat.toFixed(1),"g","background:#fff1f2;color:#e11d48"]].map(([l,v,u,sty])=>`
+          <div class="macro-cell" style="${sty}">
+            <div class="macro-val">${v}${u}</div>
+            <div class="macro-lbl">${l}</div>
           </div>`).join("")}
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Meals list -->
-  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Meals & Items</p>
-      ${isToday?`<button onclick="showAddToDietModal()" class="flex items-center gap-1 bg-primary text-white font-bold py-1.5 px-3 rounded-xl text-xs">
-        <span class="material-symbols-outlined text-sm">add</span>Add Item
+  <!-- Meal slots: Breakfast / Lunch / Dinner / Snacks -->
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px">Scheduled Meals</p>
+      ${isToday?`<button onclick="showAddToDietModal(null)" style="display:flex;align-items:center;gap:4px;background:#ec5b13;color:#fff;font-weight:700;padding:6px 12px;border-radius:12px;font-size:11px;border:none;cursor:pointer;font-family:'Public Sans',sans-serif">
+        <span class="material-symbols-outlined" style="font-size:14px">add</span>Add Item
       </button>`:""}
     </div>
-    ${entries.length===0?`
-    <div class="flex flex-col items-center py-10 text-slate-300 px-4">
-      <span class="material-symbols-outlined text-4xl mb-2">restaurant</span>
-      <span class="text-sm text-slate-400 text-center">${isToday?"Nothing logged yet today.":"No entries for this day."}</span>
-    </div>`:`
-    <div class="divide-y divide-slate-50 px-4">
-      ${entries.map((e,idx)=>`
-      <div class="flex items-center gap-3 py-3">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${e.type==="recipe"?"bg-orange-50":e.type==="pkg"?"bg-blue-50":"bg-green-50"}">
-          <span class="material-symbols-outlined ${e.type==="recipe"?"text-primary":e.type==="pkg"?"text-blue-500":"text-success"} text-xl">${e.type==="recipe"?"restaurant":e.type==="pkg"?"inventory_2":"eco"}</span>
+
+    ${[
+      {slot:"breakfast", label:"Breakfast", icon:"wb_twilight",  iconColor:"#f59e0b", iconBg:"#fffbeb"},
+      {slot:"lunch",     label:"Lunch",     icon:"light_mode",   iconColor:"#22c55e", iconBg:"#f0fdf4"},
+      {slot:"dinner",    label:"Dinner",    icon:"dark_mode",    iconColor:"#6366f1", iconBg:"#eef2ff"},
+      {slot:"snacks",    label:"Snacks",    icon:"cookie",       iconColor:"#f97316", iconBg:"#fff7ed"},
+    ].map(({slot,label,icon,iconColor,iconBg})=>{
+      const slotEntries = entries.filter(e=>( e.meal||"breakfast" ) === slot);
+      const slotCal = slotEntries.reduce((s,e)=>s+e.cal,0);
+      const isEmpty = slotEntries.length===0;
+      return `
+      <div style="background:#fff;border-radius:24px;border:${isEmpty&&isToday?"2px dashed #e2e8f0":"1px solid #f1f5f9"};box-shadow:${isEmpty?"none":"0 1px 4px rgba(0,0,0,.05)"};margin-bottom:10px;overflow:hidden">
+        <!-- Slot header -->
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;${!isEmpty?"border-bottom:1px solid #f8fafc":""}">
+          <div style="width:44px;height:44px;border-radius:16px;background:${iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="material-symbols-outlined" style="font-size:20px;color:${iconColor}">${icon}</span>
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px">${label}</p>
+            ${isEmpty
+              ? `<p style="font-size:13px;color:#cbd5e1;font-style:italic;margin-top:1px">${isToday?"Tap + to add a meal…":"Nothing logged"}</p>`
+              : `<p style="font-size:13px;font-weight:700;color:#1e293b;margin-top:1px">${slotEntries.length} item${slotEntries.length!==1?"s":""} · <span style="color:${iconColor}">${slotCal} kcal</span></p>`
+            }
+          </div>
+          ${isToday?`<button onclick="showAddToDietModal('${slot}')" style="width:32px;height:32px;border-radius:50%;background:#fff;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#94a3b8">add</span>
+          </button>`:""}
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="font-bold text-sm truncate">${e.name}</p>
-          <p class="text-xs text-slate-400 mt-0.5">${e.qty}× ${e.portionLabel} · ${(e.pro||0).toFixed(1)}g pro · ${Math.max(0,(e.carb||0)-(e.fib||0)).toFixed(1)}g net C</p>
-        </div>
-        <span class="text-sm font-bold text-primary flex-shrink-0">${e.cal} kcal</span>
-        ${isToday?`<button onclick="removeDietEntry(${idx})" class="w-7 h-7 flex items-center justify-center bg-red-50 text-red-400 rounded-lg text-xs flex-shrink-0">✕</button>`:""}
-      </div>`).join("")}
-    </div>`}
+        <!-- Slot items -->
+        ${!isEmpty?`<div style="padding:0 16px">
+          ${slotEntries.map((e)=>{
+            const idx=entries.indexOf(e);
+            return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f8fafc;overflow:hidden">
+              <div style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;${e.type==="recipe"?"background:#fff5f0":e.type==="pkg"?"background:#eff6ff":"background:#f0fdf4"}">
+                <span class="material-symbols-outlined" style="font-size:16px;${e.type==="recipe"?"color:#ec5b13":e.type==="pkg"?"color:#3b82f6":"color:#22c55e"}">${e.type==="recipe"?"restaurant":e.type==="pkg"?"inventory_2":"eco"}</span>
+              </div>
+              <div style="flex:1;min-width:0;overflow:hidden">
+                <p style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${e.name}</p>
+                <p style="font-size:11px;color:#94a3b8;margin-top:1px">${e.qty}× ${e.portionLabel} · ${(e.pro||0).toFixed(1)}g pro · ${Math.max(0,(e.carb||0)-(e.fib||0)).toFixed(1)}g net C</p>
+              </div>
+              <span style="font-size:13px;font-weight:700;color:#ec5b13;flex-shrink:0;white-space:nowrap">${e.cal} kcal</span>
+              ${isToday?`<button onclick="removeDietEntry(${idx})" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:#fff1f2;color:#f43f5e;border-radius:8px;font-size:11px;flex-shrink:0;border:none;cursor:pointer">✕</button>`:""}
+            </div>`;
+          }).join("")}
+        </div>`:""}
+      </div>`;
+    }).join("")}
   </div>`;
 
   // Scroll today pill into view
@@ -1090,12 +1130,37 @@ function removeDietEntry(idx){
   const e=getDay(dietViewDate);e.splice(idx,1);setDay(dietViewDate,e);renderDiet();
 }
 
-function showAddToDietModal(){
+function selectDietSlot(s){
+  window._dietSlot=s;
+  // Update pill styles
+  [["breakfast","#f59e0b","#fffbeb"],["lunch","#22c55e","#f0fdf4"],["dinner","#6366f1","#eef2ff"],["snacks","#f97316","#fff7ed"]].forEach(([id,col,bg])=>{
+    const btn=document.getElementById("slot_btn_"+id);
+    if(!btn)return;
+    const on=id===s;
+    btn.style.borderColor=on?col:"#e2e8f0";
+    btn.style.background=on?bg:"#fff";
+    btn.querySelectorAll("span:last-child").forEach(el=>el.style.color=on?col:"#64748b");
+  });
+}
+
+function showAddToDietModal(slot){
+  window._dietSlot = slot || "breakfast";
+  window._dietSlot = slot || "breakfast"; // store selected slot
   const lib=allIngs();
   showModal(`
     <div class="modal-handle w-9 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
-    <h3 class="text-lg font-bold mb-1">Add to Today's Diet</h3>
-    <p class="text-sm text-slate-400 mb-4">Choose a recipe or ingredient to log</p>
+    <div style="display:flex;align-items:center;gap-10px;margin-bottom:16px">
+      <h3 class="text-lg font-bold">Add to Today's Diet</h3>
+    </div>
+    <!-- Meal slot selector -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px" class="no-scrollbar">
+      ${[["breakfast","Breakfast","wb_twilight","#f59e0b","#fffbeb"],["lunch","Lunch","light_mode","#22c55e","#f0fdf4"],["dinner","Dinner","dark_mode","#6366f1","#eef2ff"],["snacks","Snacks","cookie","#f97316","#fff7ed"]].map(([s,lbl,icon,col,bg])=>`
+      <button id="slot_btn_${s}" onclick="selectDietSlot('${s}')"
+        style="display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:20px;border:1.5px solid ${window._dietSlot===s?col:"#e2e8f0"};background:${window._dietSlot===s?bg:"#fff"};cursor:pointer;font-family:'Public Sans',sans-serif;white-space:nowrap;transition:all .15s;flex-shrink:0">
+        <span class="material-symbols-outlined" style="font-size:14px;color:${col}">${icon}</span>
+        <span style="font-size:12px;font-weight:700;color:${window._dietSlot===s?col:"#64748b"}">${lbl}</span>
+      </button>`).join("")}
+    </div>
 
     ${DB.recipes.length?`
     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">🍳 Recipes</p>
@@ -1144,18 +1209,20 @@ function addRecipeToDietFromModal(recId){
   const qty=parseFloat(document.getElementById(`rqty_${recId}`)?.value)||1;
   const t=calcTotals(rec.ingredients,qty);
   const e=getDay(todayKey());
-  e.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",addedAt:new Date().toISOString()});
-  setDay(todayKey(),e);toast(`✓ Added ${rec.name} (${t.cal} kcal)`);
+  const slot=window._dietSlot||"breakfast";
+  e.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",meal:slot,addedAt:new Date().toISOString()});
+  setDay(todayKey(),e);toast(`✓ Added ${rec.name} to ${slot}`);
 }
 function addIngToDiet(ingId){
   const lib=allIngs();const ing=lib.find(a=>a.id===String(ingId));if(!ing)return;
   const qty=parseFloat(document.getElementById(`iqty_${ingId}`)?.value)||1;
   const e=getDay(todayKey());
-  e.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,addedAt:new Date().toISOString()});
-  setDay(todayKey(),e);toast(`✓ Added ${ing.label} (${Math.round(ing.cal*qty)} kcal)`);
+  const slot=window._dietSlot||"breakfast";
+  e.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,meal:slot,addedAt:new Date().toISOString()});
+  setDay(todayKey(),e);toast(`✓ Added to ${slot}`);
 }
 function addRecipeToDiet(recId){
-  closeModal();showAddToDietModal();
+  closeModal();showAddToDietModal("breakfast");
   setTimeout(()=>{const el=document.getElementById(`rqty_${recId}`);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);
 }
 
