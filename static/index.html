@@ -210,7 +210,7 @@ select.inp{cursor:pointer;font-size:16px}
 
 <script>
 // ── Storage ───────────────────────────────────────────────────────────────────
-let DB = {ingredients:[], rawIngredients:[], recipes:[], dailyDiet:{}, calorieTarget:2000};
+let DB = {ingredients:[], rawIngredients:[], recipes:[], dailyDiet:{}, calorieTarget:2000, profiles:[], activeProfile:null};
 let _saveTimer = null;
 
 async function loadDB(){
@@ -332,7 +332,7 @@ function dashHTML(){
   </div>
 
   <div class="stats">
-    ${[["Packaged",DB.ingredients.length,"📦"],["Raw Ingredients",DB.rawIngredients.length,"🥦"],["Recipes",DB.recipes.length,"🍳"],["Diet Days",Object.keys(DB.dailyDiet||{}).length,"📅"]].map(([l,v,ic])=>`<div class="stat"><div style="font-size:20px;margin-bottom:4px">${ic}</div><div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`).join("")}
+    ${[["Packaged",DB.ingredients.length,"📦"],["Raw Ingredients",DB.rawIngredients.length,"🥦"],["Recipes",DB.recipes.length,"🍳"],["Diet Days",Object.keys(profileDiet()).length,"📅"]].map(([l,v,ic])=>`<div class="stat"><div style="font-size:20px;margin-bottom:4px">${ic}</div><div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`).join("")}
   </div>
 
   ${top.length?`<div class="card"><div class="ct">Top Calorie Items</div>
@@ -353,7 +353,7 @@ function dashHTML(){
   </div>
 
   <div style="text-align:center;padding:12px 0">
-    <button class="btn bs sm" onclick="showTargetModal()" style="font-size:11px">⚙ Daily calorie target: ${DB.calorieTarget||2000} kcal</button>
+    <button class="btn bs sm" onclick="showTargetModal()" style="font-size:11px">⚙ ${activeProfile()?activeProfile().name+"'s":""} target: ${profileTarget()} kcal</button>
   </div>`;
 }
 
@@ -364,7 +364,7 @@ function showTargetModal(){
     <div class="modal-handle"></div>
     <div style="font-size:18px;font-weight:700;color:var(--txt);margin-bottom:8px">Daily Calorie Target</div>
     <p style="font-size:13px;color:var(--mut);margin-bottom:16px">Set your daily calorie goal. This will show your progress on the Overview page.</p>
-    <input id="targetinp" class="inp" type="number" placeholder="e.g. 2000" value="${DB.calorieTarget||2000}" style="margin-bottom:14px"/>
+    <input id="targetinp" class="inp" type="number" placeholder="e.g. 2000" value="${profileTarget()}" style="margin-bottom:14px"/>
     <div style="display:flex;gap:8px">
       <button class="btn bp" style="flex:1;justify-content:center" onclick="saveTarget()">Save</button>
       <button class="btn bs" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
@@ -374,7 +374,7 @@ function showTargetModal(){
 function saveTarget(){
   const v=parseInt(document.getElementById("targetinp")?.value);
   if(!v||v<100){toast("Enter a valid calorie target (e.g. 2000)","e");return;}
-  DB.calorieTarget=v; saveDB();
+  setProfileTarget(v);
   document.getElementById("modal").style.display="none";
   toast("✓ Target updated"); render();
 }
@@ -731,8 +731,42 @@ function delRecipe(id){
 // ════════════════════════════════════════════════════════════════════
 let dietViewDate = todayKey();
 
-function getDay(dateKey){ return (DB.dailyDiet||{})[dateKey]||[]; }
-function setDay(dateKey, entries){ if(!DB.dailyDiet) DB.dailyDiet={}; DB.dailyDiet[dateKey]=entries; saveDB(); }
+// ── Profile helpers ──────────────────────────────────────────────────────────
+function activeProfile(){
+  if(!DB.profiles||DB.profiles.length===0) return null;
+  return DB.profiles.find(p=>p.id===DB.activeProfile)||DB.profiles[0];
+}
+function profileDiet(){
+  const p=activeProfile();
+  if(!p) return DB.dailyDiet||{};   // legacy fallback
+  if(!p.dailyDiet) p.dailyDiet={};
+  return p.dailyDiet;
+}
+function profileTarget(){
+  const p=activeProfile();
+  return (p?p.calorieTarget:null)||DB.calorieTarget||2000;
+}
+function setProfileTarget(v){
+  const p=activeProfile();
+  if(p) p.calorieTarget=v; else DB.calorieTarget=v;
+  saveDB();
+}
+function migrateToProfiles(){
+  // One-time migration: wrap existing dailyDiet data into a default profile
+  if(DB.profiles&&DB.profiles.length>0) return;
+  const defaultProfile={id:"p_default",name:"Me",emoji:"😊",calorieTarget:DB.calorieTarget||2000,dailyDiet:DB.dailyDiet||{},createdAt:new Date().toISOString()};
+  DB.profiles=[defaultProfile];
+  DB.activeProfile="p_default";
+  saveDB();
+}
+function getDay(dateKey){
+  return profileDiet()[dateKey]||[];
+}
+function setDay(dateKey, entries){
+  const diet=profileDiet();
+  diet[dateKey]=entries;
+  saveDB();
+}
 
 function last30Days(){
   const days=[];
@@ -771,14 +805,30 @@ function renderDiet(){
   const entries=getDay(dietViewDate);
   const tot=dietTotals(entries);
   const netCarb=Math.max(0,tot.carb-tot.fib);
-  const target=DB.calorieTarget||2000;
+  const target=profileTarget();
   const pct=Math.min(100,Math.round(tot.cal/target*100));
   const barClass=pct>100?"over":pct>85?"warn":"";
   const isToday=dietViewDate===todayKey();
 
+  const prof=activeProfile();
+  const profName=prof?prof.name:"Me";
+  const profEmoji=prof?prof.emoji:"😊";
+
   document.getElementById("page").innerHTML=`
-  <h2 class="h1">Daily Diet</h2>
-  <p class="sub">Track your meals day by day. Auto-resets at midnight, keeps 30 days of history.</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div>
+      <h2 class="h1" style="margin-bottom:2px">Daily Diet</h2>
+      <p style="color:var(--mut);font-size:13px">Track meals day by day · 30-day history</p>
+    </div>
+    <button onclick="showProfileModal()" style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--sur);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);font-family:'Inter',sans-serif" onmouseenter="this.style.borderColor='var(--acc)'" onmouseleave="this.style.borderColor='var(--bor)'">
+      <span style="font-size:20px">${profEmoji}</span>
+      <div style="text-align:left">
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">${profName}</div>
+        <div style="font-size:10px;color:var(--mut);font-weight:500">Switch profile</div>
+      </div>
+      <span style="color:var(--mut2);font-size:14px;margin-left:2px">›</span>
+    </button>
+  </div>
 
   <!-- Day selector -->
   <div class="day-tabs" id="daytabs">
@@ -929,6 +979,139 @@ function addRecipeToDiet(recId){
   },100);
 }
 
+
+// ════════════════════════════════════════════════════════════════════
+// ── PROFILE MANAGEMENT ───────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+const PROFILE_EMOJIS = ["😊","💪","🧘","🏃","👩","👨","👧","👦","🧑","👴","👵","🤸","🍎","🥗","⭐","🌟","🦁","🐯","🐻","🦊"];
+
+function showProfileModal(){
+  const m = document.getElementById("modal");
+  m.style.display = "flex"; m.className = "modal-overlay";
+  renderProfileModal();
+}
+
+function renderProfileModal(){
+  const m = document.getElementById("modal");
+  const profiles = DB.profiles||[];
+  const active = DB.activeProfile;
+  m.innerHTML = `<div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:18px;font-weight:700;color:var(--txt)">Family Profiles</div>
+      <button onclick="showAddProfileForm()" style="padding:7px 14px;background:var(--acc);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">+ Add</button>
+    </div>
+
+    <div id="profile-list">
+      ${profiles.map(p => {
+        const days = Object.keys(p.dailyDiet||{}).length;
+        const todayEntries = (p.dailyDiet||{})[todayKey()]||[];
+        const todayCal = todayEntries.reduce((s,e)=>s+e.cal,0);
+        const isActive = p.id === active;
+        return `<div onclick="switchProfile('${p.id}')" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:${isActive?"2px solid var(--acc)":"1.5px solid var(--bor)"};background:${isActive?"var(--acc-light)":"var(--card2)"};margin-bottom:10px;cursor:pointer;transition:all .15s">
+          <div style="width:50px;height:50px;border-radius:50%;background:${isActive?"var(--acc)":"var(--bor)"};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${p.emoji||"😊"}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:8px">
+              ${p.name}
+              ${isActive?`<span style="font-size:10px;background:var(--acc);color:#fff;padding:2px 8px;border-radius:20px;font-weight:600">Active</span>`:""}
+            </div>
+            <div style="font-size:12px;color:var(--mut);margin-top:3px">
+              ${p.calorieTarget||2000} kcal target · ${days} day${days!==1?"s":""} logged
+              ${todayCal>0?` · <strong style="color:var(--acc)">${todayCal} kcal today</strong>`:""}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="event.stopPropagation();showEditProfile('${p.id}')" style="padding:6px 10px;background:var(--sur);border:1px solid var(--bor);border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--txt2)">Edit</button>
+            ${profiles.length>1?`<button onclick="event.stopPropagation();deleteProfile('${p.id}')" style="padding:6px 10px;background:var(--red-light);border:1px solid rgba(255,59,48,.2);border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--red)">✕</button>`:""}
+          </div>
+        </div>`;
+      }).join("")}
+    </div>
+
+    <div id="profile-form" style="display:none"></div>
+
+    <button class="btn bs" style="width:100%;justify-content:center;margin-top:8px" onclick="document.getElementById('modal').style.display='none'">Done</button>
+  </div>`;
+}
+
+function showAddProfileForm(editId){
+  const editing = editId ? DB.profiles.find(p=>p.id===editId) : null;
+  const formEl = document.getElementById("profile-form");
+  const listEl = document.getElementById("profile-list");
+  if(listEl) listEl.style.display="none";
+  if(formEl){
+    formEl.style.display="block";
+    formEl.innerHTML = `
+      <div style="margin-bottom:16px">
+        <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:12px">${editing?"Edit Profile":"New Profile"}</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;margin-bottom:8px">Name</div>
+        <input id="pname" class="inp" placeholder="e.g. Sarah, Dad, Mum…" value="${editing?editing.name:""}" style="margin-bottom:14px"/>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;margin-bottom:8px">Daily Calorie Target</div>
+        <input id="ptarget" class="inp" type="number" placeholder="e.g. 1800" value="${editing?editing.calorieTarget:""}" style="margin-bottom:14px"/>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:600;margin-bottom:10px">Choose Emoji</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          ${PROFILE_EMOJIS.map(e=>`<div onclick="selectEmoji('${e}')" id="emoji_${e}" style="width:40px;height:40px;border-radius:10px;border:${(editing?editing.emoji:PROFILE_EMOJIS[0])===e?"2px solid var(--acc)":"1.5px solid var(--bor)"};display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:all .15s;background:${(editing?editing.emoji:PROFILE_EMOJIS[0])===e?"var(--acc-light)":"var(--card2)"}">${e}</div>`).join("")}
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn bp" style="flex:1;justify-content:center" onclick="saveProfile(${editId?`'${editId}'`:null})">${editing?"Save Changes":"Create Profile"}</button>
+          <button class="btn bs" onclick="document.getElementById('profile-list').style.display='block';document.getElementById('profile-form').style.display='none'">Cancel</button>
+        </div>
+      </div>`;
+    // Set selected emoji
+    window._selectedEmoji = editing ? editing.emoji : PROFILE_EMOJIS[0];
+  }
+}
+
+function showEditProfile(id){showAddProfileForm(id);}
+
+function selectEmoji(e){
+  window._selectedEmoji = e;
+  document.querySelectorAll("[id^='emoji_']").forEach(el=>{
+    const isSelected = el.id === `emoji_${e}`;
+    el.style.border = isSelected ? "2px solid var(--acc)" : "1.5px solid var(--bor)";
+    el.style.background = isSelected ? "var(--acc-light)" : "var(--card2)";
+  });
+}
+
+function saveProfile(editId){
+  const name = (document.getElementById("pname")?.value||"").trim();
+  const target = parseInt(document.getElementById("ptarget")?.value)||2000;
+  const emoji = window._selectedEmoji || PROFILE_EMOJIS[0];
+  if(!name){toast("Enter a name for this profile","e");return;}
+  if(!DB.profiles) DB.profiles=[];
+  if(editId){
+    const p = DB.profiles.find(p=>p.id===editId);
+    if(p){p.name=name;p.calorieTarget=target;p.emoji=emoji;}
+  } else {
+    const id = "p_"+Date.now();
+    DB.profiles.push({id,name,emoji,calorieTarget:target,dailyDiet:{},createdAt:new Date().toISOString()});
+    if(DB.profiles.length===1) DB.activeProfile=id;
+  }
+  saveDB();
+  toast(editId?"✓ Profile updated":"✓ Profile created — tap to switch");
+  renderProfileModal();
+}
+
+function switchProfile(id){
+  DB.activeProfile = id;
+  dietViewDate = todayKey(); // reset to today when switching
+  saveDB();
+  document.getElementById("modal").style.display="none";
+  toast(`✓ Switched to ${DB.profiles.find(p=>p.id===id)?.name||"profile"}`);
+  render();
+}
+
+function deleteProfile(id){
+  if(DB.profiles.length<=1){toast("Can't delete the only profile","e");return;}
+  const p = DB.profiles.find(x=>x.id===id);
+  if(!confirm(`Delete ${p?.name||"this profile"} and all their diet history?`)) return;
+  DB.profiles = DB.profiles.filter(x=>x.id!==id);
+  if(DB.activeProfile===id) DB.activeProfile=DB.profiles[0]?.id;
+  saveDB();
+  toast("Profile deleted");
+  renderProfileModal();
+}
+
 // ── After-render hooks ────────────────────────────────────────────────────────
 function bindAfterRender(){
   if(recMode==="create"){
@@ -960,12 +1143,14 @@ function showInstallBanner(){
 
 // ── Auto-reset today's diet at midnight ──────────────────────────────────────
 function checkMidnightReset(){
-  const key=todayKey();
-  if(!DB.dailyDiet) DB.dailyDiet={};
-  // Prune entries older than 30 days
+  migrateToProfiles();
   const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-30);
   const cutKey=cutoff.toISOString().split("T")[0];
-  Object.keys(DB.dailyDiet).forEach(k=>{ if(k<cutKey) delete DB.dailyDiet[k]; });
+  // Prune old entries from all profiles
+  (DB.profiles||[]).forEach(p=>{
+    if(!p.dailyDiet) p.dailyDiet={};
+    Object.keys(p.dailyDiet).forEach(k=>{ if(k<cutKey) delete p.dailyDiet[k]; });
+  });
   saveDB();
 }
 
