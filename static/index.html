@@ -53,7 +53,7 @@ body{font-family:'Public Sans',sans-serif;background:#f8f6f6;color:#1e293b;min-h
 @media(min-width:600px){.modal-wrap{align-items:center;padding:20px}.modal-box{border-radius:20px}}
 
 /* Diet day pills */
-.day-pill-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:72px;border-radius:16px;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;transition:all .15s;font-family:'Public Sans',sans-serif}
+.day-pill-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:66px;border-radius:14px;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;transition:all .15s;font-family:'Public Sans',sans-serif}
 .day-pill-btn.active{background:#ec5b13;border-color:#ec5b13;color:#fff;box-shadow:0 4px 12px rgba(236,91,19,.3)}
 .day-pill-btn:not(.active){color:#64748b}
 
@@ -81,6 +81,16 @@ body{font-family:'Public Sans',sans-serif;background:#f8f6f6;color:#1e293b;min-h
 /* Rir (ingredient row in recipe builder) */
 .rir{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9}
 .rir:last-child{border-bottom:none}
+
+/* Macro rows — inline label+value per row */
+.macro-grid{display:flex;flex-direction:column;gap:4px;width:100%}
+.macro-row{display:flex;align-items:center;justify-content:space-between;border-radius:10px;padding:7px 10px;overflow:hidden}
+.macro-row-val{font-size:14px;font-weight:700;white-space:nowrap}
+.macro-row-lbl{font-size:11px;font-weight:600;opacity:.75;margin-left:4px}
+
+/* Global overflow guards */
+.page-content *{min-width:0}
+.page-content img{max-width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -252,7 +262,7 @@ function render(){
 
   // Render page
   const pg=document.getElementById("page");
-  pg.className="page-content flex-1 max-w-lg mx-auto w-full px-4 pt-5 space-y-5";
+  pg.className="page-content flex-1 max-w-lg mx-auto w-full px-4 pt-4 space-y-4";
   if(TAB==="dashboard"){pg.innerHTML=dashHTML();animateRing();}
   else if(TAB==="scan")renderScan();
   else if(TAB==="raw")renderRaw();
@@ -849,10 +859,12 @@ function renderRecView(){
       </div>
       <div style="flex:1;min-width:0">
         <div class="macro-grid">
-          ${[["Protein",tot.pro,"g","background:#eff6ff;color:#2563eb"],["Carbs",tot.carb,"g","background:#fffbeb;color:#d97706"],["Net Carbs",tot.netCarb,"g","background:#f5f3ff;color:#7c3aed"],["Fat",tot.fat,"g","background:#fff1f2;color:#e11d48"]].map(([l,v,u,sty])=>`
-          <div class="macro-cell" style="${sty}">
-            <div class="macro-val">${v}${u}</div>
-            <div class="macro-lbl">${l}</div>
+          ${[["Protein",tot.pro,"g","#eff6ff","#2563eb"],["Carbs",tot.carb,"g","#fffbeb","#d97706"],["Net Carbs",tot.netCarb,"g","#f5f3ff","#7c3aed"],["Fat",tot.fat,"g","#fff1f2","#e11d48"]].map(([l,v,u,bg,col])=>`
+          <div class="macro-row" style="background:${bg}">
+            <div style="display:flex;align-items:baseline;gap:3px">
+              <span class="macro-row-val" style="color:${col}">${v}${u}</span>
+              <span class="macro-row-lbl" style="color:${col}">${l}</span>
+            </div>
           </div>`).join("")}
         </div>
         <div class="flex items-center gap-2 mt-3" style="width:100%">
@@ -1000,21 +1012,21 @@ function renderDiet(){
 
   document.getElementById("page").innerHTML=`
   <!-- Header row -->
-  <div class="flex items-start justify-between">
+  <div class="flex items-center justify-between">
     <div>
-      <h2 class="text-3xl font-bold">Daily Diet</h2>
-      <p class="text-slate-400 text-sm mt-1">Track meals day by day · 30-day history</p>
+      <h2 class="text-2xl font-bold">Daily Diet</h2>
+      <p class="text-slate-400 text-sm mt-0.5">Track meals · 30-day history</p>
     </div>
-    <button onclick="showProfileModal()" class="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-sm active:scale-95 transition-transform">
-      <span class="text-xl">${prof?.emoji||"😊"}</span>
-      <span class="text-sm font-bold">${prof?.name||"Me"}</span>
-      <span class="material-symbols-outlined text-slate-300 text-base">expand_more</span>
+    <button onclick="showProfileModal()" style="display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;border-radius:20px;padding:6px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;font-family:'Public Sans',sans-serif;flex-shrink:0">
+      <span style="font-size:18px">${prof?.emoji||"😊"}</span>
+      <span style="font-size:13px;font-weight:700;color:#1e293b;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prof?.name||"Me"}</span>
+      <span class="material-symbols-outlined" style="font-size:14px;color:#cbd5e1">expand_more</span>
     </button>
   </div>
 
   <!-- Day selector - calendar style -->
-  <div>
-    <div class="flex items-center justify-between mb-3">
+  <div style="margin-top:-4px">
+    <div class="flex items-center justify-between mb-2">
       <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select Day</p>
       ${!isToday?`<button onclick="dietViewDate=todayKey();renderDiet()" class="text-xs font-bold text-primary">→ Today</button>`:""}
     </div>
@@ -1036,28 +1048,30 @@ function renderDiet(){
 
   <!-- Day summary card -->
   <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
-    <div class="flex items-center gap-4">
-      <div class="relative flex-shrink-0" style="width:100px;height:100px">
+    <div class="flex items-center gap-3">
+      <div class="relative flex-shrink-0" style="width:90px;height:90px">
         <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
-          <circle class="stroke-slate-100" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.5"/>
+          <circle class="stroke-slate-100" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3"/>
           <circle cx="18" cy="18" fill="none" r="15.9155"
             stroke="${ringColor}"
             stroke-dasharray="${pct},100"
-            stroke-linecap="round" stroke-width="3.5"/>
+            stroke-linecap="round" stroke-width="3"/>
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
-          <span class="font-black leading-none" style="color:${ringColor};font-size:18px">${tot.cal}</span>
-          <span class="text-slate-400 uppercase font-bold" style="font-size:8px">kcal</span>
+          <span class="font-black leading-none" style="color:${ringColor};font-size:16px">${tot.cal}</span>
+          <span class="text-slate-400 uppercase font-bold" style="font-size:7px;margin-top:1px">kcal</span>
         </div>
       </div>
       <div style="flex:1;min-width:0">
         <p class="font-bold text-slate-700 leading-tight mb-0.5" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fmtDayFull(dietViewDate)}</p>
         <p class="text-slate-400 mb-2" style="font-size:11px">${target-tot.cal>0?`${target-tot.cal} left`:`${tot.cal-target} over`} · ${target} kcal target</p>
         <div class="macro-grid">
-          ${[["Protein",tot.pro.toFixed(1),"g","background:#eff6ff;color:#2563eb"],["Carbs",tot.carb.toFixed(1),"g","background:#fffbeb;color:#d97706"],["Net Carbs",nc.toFixed(1),"g","background:#f5f3ff;color:#7c3aed"],["Fat",tot.fat.toFixed(1),"g","background:#fff1f2;color:#e11d48"]].map(([l,v,u,sty])=>`
-          <div class="macro-cell" style="${sty}">
-            <div class="macro-val">${v}${u}</div>
-            <div class="macro-lbl">${l}</div>
+          ${[["Protein",tot.pro.toFixed(1),"g","#eff6ff","#2563eb"],["Carbs",tot.carb.toFixed(1),"g","#fffbeb","#d97706"],["Net Carbs",nc.toFixed(1),"g","#f5f3ff","#7c3aed"],["Fat",tot.fat.toFixed(1),"g","#fff1f2","#e11d48"]].map(([l,v,u,bg,col])=>`
+          <div class="macro-row" style="background:${bg}">
+            <div style="display:flex;align-items:baseline;gap:3px">
+              <span class="macro-row-val" style="color:${col}">${v}${u}</span>
+              <span class="macro-row-lbl" style="color:${col}">${l}</span>
+            </div>
           </div>`).join("")}
         </div>
       </div>
@@ -1066,7 +1080,7 @@ function renderDiet(){
 
   <!-- Meal slots: Breakfast / Lunch / Dinner / Snacks -->
   <div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px">Scheduled Meals</p>
       ${isToday?`<button onclick="showAddToDietModal(null)" style="display:flex;align-items:center;gap:4px;background:#ec5b13;color:#fff;font-weight:700;padding:6px 12px;border-radius:12px;font-size:11px;border:none;cursor:pointer;font-family:'Public Sans',sans-serif">
         <span class="material-symbols-outlined" style="font-size:14px">add</span>Add Item
@@ -1085,9 +1099,9 @@ function renderDiet(){
       return `
       <div style="background:#fff;border-radius:24px;border:${isEmpty&&isToday?"2px dashed #e2e8f0":"1px solid #f1f5f9"};box-shadow:${isEmpty?"none":"0 1px 4px rgba(0,0,0,.05)"};margin-bottom:10px;overflow:hidden">
         <!-- Slot header -->
-        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;${!isEmpty?"border-bottom:1px solid #f8fafc":""}">
-          <div style="width:44px;height:44px;border-radius:16px;background:${iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <span class="material-symbols-outlined" style="font-size:20px;color:${iconColor}">${icon}</span>
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;${!isEmpty?"border-bottom:1px solid #f8fafc":""}">
+          <div style="width:38px;height:38px;border-radius:12px;background:${iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="material-symbols-outlined" style="font-size:18px;color:${iconColor}">${icon}</span>
           </div>
           <div style="flex:1;min-width:0">
             <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px">${label}</p>
