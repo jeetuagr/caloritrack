@@ -308,9 +308,9 @@ function dashHTML(){
   const top=[...DB.rawIngredients,...DB.ingredients.map(i=>({...i,name:i.productName,caloriesTotal:i.caloriesPerServing}))].sort((a,b)=>b.caloriesTotal-a.caloriesTotal).slice(0,5);
   const recent=[...DB.recipes].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,3);
   // Today's diet summary
-  const today=DB.dailyDiet?.[todayKey()]||[];
+  const today=getDay(todayKey());
   const todayCal=today.reduce((s,e)=>s+e.cal,0);
-  const target=DB.calorieTarget||2000;
+  const target=profileTarget();
   const pct=Math.min(100,Math.round(todayCal/target*100));
   const barClass=pct>100?"over":pct>85?"warn":"";
   return`
