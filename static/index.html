@@ -183,6 +183,39 @@ async function callClaude(messages,system=""){
   if(!r.ok||d.error)throw new Error(d.error||"API error "+r.status);
   return d.content?.map(b=>b.text||"").join("")||"";
 }
+// ── Food image generation ────────────────────────────────────────────────────
+const _imgCache = {}; // session cache: name -> dataURI
+
+async function generateFoodImage(name) {
+  if (!name) return null;
+  const key = name.toLowerCase().trim();
+  if (_imgCache[key]) return _imgCache[key];
+  try {
+    const r = await fetch("/api/food-image", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name})
+    });
+    const d = await r.json();
+    if (d.imageUrl) {
+      _imgCache[key] = d.imageUrl;
+      return d.imageUrl;
+    }
+  } catch(e) { console.warn("Image gen failed:", e); }
+  return null;
+}
+
+// Render a food image element with fallback placeholder
+function foodImgHTML(imageUrl, name, size=80, radius=16) {
+  if (imageUrl) {
+    return `<img src="${imageUrl}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:${radius}px;object-fit:cover;display:block;flex-shrink:0"/>`;
+  }
+  // Placeholder while loading or if failed
+  return `<div style="width:${size}px;height:${size}px;border-radius:${radius}px;background:linear-gradient(135deg,#ffedd5,#fef3c7);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+    <span class="material-symbols-outlined" style="font-size:${Math.round(size*0.45)}px;color:rgba(236,91,19,.4)">restaurant</span>
+  </div>`;
+}
+
 async function scanLabel(dataUrl){
   const parts=dataUrl.split(",");
   const mime=(parts[0].match(/data:(image\/[^;]+)/)||[])[1]||"image/jpeg";
@@ -385,8 +418,11 @@ function dashHTML(){
     <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
       ${recent.map(rec=>{const t=calcTotals(rec.ingredients);return`
       <div onclick="openRecipe('${rec.id}')" style="flex:none;width:160px;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s" ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform=''">
-        <div style="width:100%;height:100px;background:linear-gradient(135deg,#ffedd5,#fef3c7);display:flex;align-items:center;justify-content:center">
-          <span class="material-symbols-outlined" style="font-size:40px;color:rgba(236,91,19,.35)">restaurant</span>
+        <div style="width:100%;height:100px;overflow:hidden">
+          ${rec.imageUrl
+            ? `<img src="${rec.imageUrl}" alt="${rec.name}" style="width:100%;height:100%;object-fit:cover;display:block"/>`
+            : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#ffedd5,#fef3c7);display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:40px;color:rgba(236,91,19,.35)">restaurant</span></div>`
+          }
         </div>
         <div style="padding:10px 12px">
           <p style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${rec.name}</p>
@@ -546,7 +582,12 @@ function renderScan(){
         <tbody>
           ${DB.ingredients.map(i=>{const fib=i.fiber||0;const nc=Math.max(0,(i.carbs||0)-fib);return`
           <tr>
-            <td class="font-semibold">${i.productName}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                ${i.imageUrl ? `<img src="${i.imageUrl}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0"/>` : `<div style="width:28px;height:28px;border-radius:8px;background:#ffedd5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-outlined" style="font-size:14px;color:#ec5b13">inventory_2</span></div>`}
+                <span class="font-semibold" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.productName}</span>
+              </div>
+            </td>
             <td class="text-slate-400">${i.servingSize}</td>
             <td><span class="px-2 py-0.5 bg-green-50 text-success text-[10px] font-bold rounded-full">${i.caloriesPerServing}</span></td>
             <td>${i.protein||0}g</td><td>${i.carbs||0}g</td>
@@ -682,14 +723,21 @@ function showScanResult(info){
     </div>`).join("")}
   </div>
   ${info.ingredients?`<div class="text-[10px] text-slate-400 leading-relaxed p-2 bg-slate-50 rounded-xl"><strong class="text-slate-600">Ingredients: </strong>${info.ingredients}</div>`:""}
-  <button onclick="savePackaged()" class="w-full mt-3 bg-primary text-white font-bold py-3 rounded-xl text-sm">+ Save to Library</button>`;
+  <button onclick="savePackaged()" class="w-full mt-3 bg-primary text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2"><span class="material-symbols-outlined text-base">add_circle</span>Save to Library</button>`;
   setTimeout(()=>{const el=document.getElementById("savename");if(el){el.focus();el.select();}},50);
 }
-function savePackaged(){
+async function savePackaged(){
   if(!scanResult)return;
   const name=(document.getElementById("savename")?.value||"").trim()||scanResult.productName;
-  DB.ingredients.push({...scanResult,productName:name,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"});
+  const item={...scanResult,productName:name,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"};
+  DB.ingredients.push(item);
   saveDB();toast(`✓ Saved: ${name}`);scanResult=null;scanCaptured=null;render();
+  // Generate image in background and update
+  generateFoodImage(name).then(url=>{
+    if(!url)return;
+    const i=DB.ingredients.find(x=>x.id===item.id);
+    if(i){i.imageUrl=url;saveDB();if(TAB==="scan"||TAB==="dashboard")render();}
+  });
 }
 function resetScan(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}scanCaptured=null;scanResult=null;render();}
 function delIng(id){DB.ingredients=DB.ingredients.filter(i=>String(i.id)!==id);saveDB();render();}
@@ -739,7 +787,12 @@ function renderRaw(){
         <tbody>
           ${DB.rawIngredients.map(i=>{const fib=i.fiberTotal||0;const nc=Math.max(0,(i.carbsTotal||0)-fib);return`
           <tr>
-            <td class="font-semibold capitalize">${i.name}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                ${i.imageUrl ? `<img src="${i.imageUrl}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0"/>` : `<div style="width:28px;height:28px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-outlined" style="font-size:14px;color:#22c55e">eco</span></div>`}
+                <span class="font-semibold capitalize" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.name}</span>
+              </div>
+            </td>
             <td class="text-slate-400">${i.quantity}${i.unit}</td>
             <td><span class="px-2 py-0.5 bg-green-50 text-success text-[10px] font-bold rounded-full">${Math.round(i.caloriesTotal)}</span></td>
             <td>${fmt(i.proteinTotal)}g</td><td>${fmt(i.carbsTotal)}g</td>
@@ -771,9 +824,18 @@ async function doLookup(){
   document.getElementById("rawld").style.display="flex";
   try{
     const res=await lookupCalories(valid.map(r=>({name:r.name.trim(),quantity:parseFloat(r.qty),unit:r.unit})));
-    res.forEach(r=>DB.rawIngredients.push({...r,id:Date.now()+Math.random(),addedAt:new Date().toISOString(),type:"raw"}));
+    const newItems=res.map(r=>({...r,id:Date.now()+Math.random(),addedAt:new Date().toISOString(),type:"raw"}));
+    newItems.forEach(r=>DB.rawIngredients.push(r));
     saveDB();toast(`✓ Added ${res.length} ingredient${res.length>1?"s":""}`);
     rawRows=[{name:"",qty:"",unit:"g"}];renderRaw();
+    // Generate images in background
+    newItems.forEach(item=>{
+      generateFoodImage(item.name).then(url=>{
+        if(!url)return;
+        const i=DB.rawIngredients.find(x=>x.id===item.id);
+        if(i){i.imageUrl=url;saveDB();if(TAB==="raw"||TAB==="dashboard")render();}
+      });
+    });
   }catch(err){toast("Error: "+(err.message||"unknown"),"e");}
   const ld=document.getElementById("rawld");if(ld)ld.style.display="none";
   const lb=document.getElementById("lookupbtn");if(lb)lb.disabled=false;
@@ -807,8 +869,11 @@ function renderRecipes(){
   <div class="space-y-3">
     ${DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
     <div onclick="openRecipe('${rec.id}')" class="rec-card">
-      <div class="w-20 h-full flex-shrink-0 bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center self-stretch" style="min-height:72px">
-        <span class="material-symbols-outlined text-3xl text-primary/40">restaurant</span>
+      <div class="w-20 flex-shrink-0 self-stretch" style="min-height:72px;overflow:hidden">
+        ${rec.imageUrl
+          ? `<img src="${rec.imageUrl}" alt="${rec.name}" style="width:100%;height:100%;object-fit:cover;display:block"/>`
+          : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#ffedd5,#fef3c7);display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined text-3xl text-primary/40">restaurant</span></div>`
+        }
       </div>
       <div class="flex-1 p-3 min-w-0 overflow-hidden">
         <p class="font-bold text-sm leading-tight" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rec.name}</p>
@@ -840,6 +905,12 @@ function renderRecView(){
     <h2 class="text-3xl font-bold">${rec.name}</h2>
     ${rec.description?`<p class="text-slate-400 text-sm mt-1">${rec.description}</p>`:""}
   </div>
+
+  <!-- Recipe image -->
+  ${rec.imageUrl ? `
+  <div style="width:100%;height:180px;border-radius:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1)">
+    <img src="${rec.imageUrl}" alt="${rec.name}" style="width:100%;height:100%;object-fit:cover;display:block"/>
+  </div>` : ""}
 
   <!-- Ring + macros -->
   <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
@@ -975,8 +1046,15 @@ function saveRecipe(){
   if(!recName){toast("Enter a recipe name","e");return;}
   const valid=recIng.filter(r=>r.ingredientId&&r.qty>0);
   if(!valid.length){toast("Add at least one ingredient","e");return;}
-  DB.recipes.push({id:Date.now(),name:recName,description:recDesc,ingredients:valid,createdAt:new Date().toISOString()});
+  const recipe={id:Date.now(),name:recName,description:recDesc,ingredients:valid,createdAt:new Date().toISOString()};
+  DB.recipes.push(recipe);
   saveDB();toast(`✓ Saved: ${recName}`);recMode="list";render();
+  // Generate image in background
+  generateFoodImage(recName).then(url=>{
+    if(!url)return;
+    const r=DB.recipes.find(x=>x.id===recipe.id);
+    if(r){r.imageUrl=url;saveDB();if(TAB==="recipes"||TAB==="dashboard")render();}
+  });
 }
 function delRecipe(id){
   if(!confirm("Delete this recipe?"))return;
@@ -1119,8 +1197,11 @@ function renderDiet(){
           ${slotEntries.map((e)=>{
             const idx=entries.indexOf(e);
             return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f8fafc;overflow:hidden">
-              <div style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;${e.type==="recipe"?"background:#fff5f0":e.type==="pkg"?"background:#eff6ff":"background:#f0fdf4"}">
-                <span class="material-symbols-outlined" style="font-size:16px;${e.type==="recipe"?"color:#ec5b13":e.type==="pkg"?"color:#3b82f6":"color:#22c55e"}">${e.type==="recipe"?"restaurant":e.type==="pkg"?"inventory_2":"eco"}</span>
+              <div style="width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0">
+                ${e.imageUrl
+                  ? `<img src="${e.imageUrl}" alt="${e.name}" style="width:100%;height:100%;object-fit:cover;display:block"/>`
+                  : `<div style="width:100%;height:100%;${e.type==="recipe"?"background:#fff5f0":e.type==="pkg"?"background:#eff6ff":"background:#f0fdf4"};display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:16px;${e.type==="recipe"?"color:#ec5b13":e.type==="pkg"?"color:#3b82f6":"color:#22c55e"}">${e.type==="recipe"?"restaurant":e.type==="pkg"?"inventory_2":"eco"}</span></div>`
+                }
               </div>
               <div style="flex:1;min-width:0;overflow:hidden">
                 <p style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${e.name}</p>
@@ -1224,7 +1305,7 @@ function addRecipeToDietFromModal(recId){
   const t=calcTotals(rec.ingredients,qty);
   const e=getDay(todayKey());
   const slot=window._dietSlot||"breakfast";
-  e.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",meal:slot,addedAt:new Date().toISOString()});
+  e.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",meal:slot,imageUrl:rec.imageUrl||null,addedAt:new Date().toISOString()});
   setDay(todayKey(),e);toast(`✓ Added ${rec.name} to ${slot}`);
 }
 function addIngToDiet(ingId){
@@ -1232,7 +1313,9 @@ function addIngToDiet(ingId){
   const qty=parseFloat(document.getElementById(`iqty_${ingId}`)?.value)||1;
   const e=getDay(todayKey());
   const slot=window._dietSlot||"breakfast";
-  e.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,meal:slot,addedAt:new Date().toISOString()});
+  // Find original item's imageUrl
+  const origItem=[...DB.ingredients,...DB.rawIngredients].find(x=>String(x.id)===ing.id);
+  e.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,meal:slot,imageUrl:origItem?.imageUrl||null,addedAt:new Date().toISOString()});
   setDay(todayKey(),e);toast(`✓ Added to ${slot}`);
 }
 function addRecipeToDiet(recId){

@@ -158,6 +158,49 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"error": f"Network error: {e.reason}"}, 503)
             return
 
+        # ── Generate food image via Claude SVG ──────────────────────────────
+        if self.path == "/api/food-image":
+            key = API_KEY
+            if not key:
+                self.send_json({"error": "No API key"}, 401)
+                return
+            food_name = body.get("name", "food")
+            prompt = f"""Create a beautiful, appetizing SVG illustration of "{food_name}" for a food tracking app.
+
+Style: Clean, modern food illustration. Warm colors. Centered composition. No text labels.
+Size: 200x200 viewBox. Use shapes, gradients, and details to make it look delicious and recognizable.
+Output ONLY the raw SVG code starting with <svg and ending with </svg>. No explanation, no markdown."""
+
+            req_body = json.dumps({
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 1500,
+                "messages": [{"role": "user", "content": prompt}]
+            }).encode()
+            req = urllib.request.Request(
+                "https://api.anthropic.com/v1/messages",
+                data=req_body,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": key,
+                    "anthropic-version": "2023-06-01",
+                },
+                method="POST"
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    result = json.loads(resp.read())
+                svg = result.get("content", [{}])[0].get("text", "")
+                # Extract SVG if wrapped in anything
+                if "<svg" in svg:
+                    svg = svg[svg.index("<svg"):svg.rindex("</svg>")+6]
+                import base64
+                b64 = base64.b64encode(svg.encode()).decode()
+                data_uri = f"data:image/svg+xml;base64,{b64}"
+                self.send_json({"imageUrl": data_uri})
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
+            return
+
         self.send_json({"error": "unknown endpoint"}, 404)
 
 
