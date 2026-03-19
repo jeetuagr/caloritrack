@@ -225,8 +225,16 @@ async function scanLabel(dataUrl){
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
 }
 async function lookupCalories(items){
-  const sys=`Return ONLY a raw JSON array, no markdown:\n[{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number,"fiberTotal":number}]\nUse USDA values. Always include fiberTotal (0 if none).`;
-  const t=await callClaude([{role:"user",content:`Nutrition for: ${JSON.stringify(items)}`}],sys);
+  const sys=`You are a precise nutrition data expert. Return ONLY a raw JSON array, no markdown, no explanation.
+Format: [{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number,"fiberTotal":number}]
+
+CRITICAL RULES:
+1. If the item appears to be a BRANDED product (contains brand name, e.g. "Milky Mist", "Amul", "Britannia", "Quaker", "Kellogg's", etc.), use the specific nutritional values for THAT brand, NOT generic values. Branded products often have different macro profiles than generic versions.
+2. Scale all values to the EXACT quantity and unit provided (e.g. 100g, 1 cup).
+3. Always include fiberTotal (use 0 if truly none).
+4. Be as accurate as possible — prioritize branded/specific data over generic USDA values when the item name suggests a specific product.
+5. For Indian branded items, use their known label values (e.g. Milky Mist High Protein Paneer has ~25g protein per 100g, not the generic 18g).`;
+  const t=await callClaude([{role:"user",content:`Provide accurate nutrition data for these specific items (use branded values if brand is mentioned):\n${JSON.stringify(items)}`}],sys);
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return[];}
 }
 
@@ -1240,16 +1248,28 @@ function selectDietSlot(s){
 
 function showAddToDietModal(slot){
   window._dietSlot = slot || "breakfast";
-  window._dietSlot = slot || "breakfast"; // store selected slot
+  window._addedItems = {}; // track {id: count} for badge display
   const lib=allIngs();
-  showModal(`
-    <div class="modal-handle w-9 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
-    <div style="display:flex;align-items:center;gap-10px;margin-bottom:16px">
-      <h3 class="text-lg font-bold">Add to Today's Diet</h3>
+
+  const SLOTS=[["breakfast","Breakfast","wb_twilight","#f59e0b","#fffbeb"],["lunch","Lunch","light_mode","#22c55e","#f0fdf4"],["dinner","Dinner","dark_mode","#6366f1","#eef2ff"],["snacks","Snacks","cookie","#f97316","#fff7ed"]];
+
+  const root=document.getElementById("modal-root");
+  root.style.display="flex";
+  root.className="modal-wrap";
+
+  root.innerHTML=`<div class="modal-box" id="diet-modal-box" style="position:relative;padding-bottom:80px">
+    <!-- Drag handle -->
+    <div class="modal-handle w-9 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+
+    <!-- Header with item count -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="font-size:17px;font-weight:700;color:#1e293b">Add to Today's Diet</h3>
+      <div id="diet-added-badge" style="display:none;background:#ec5b13;color:#fff;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700">0 added</div>
     </div>
+
     <!-- Meal slot selector -->
     <div style="display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px" class="no-scrollbar">
-      ${[["breakfast","Breakfast","wb_twilight","#f59e0b","#fffbeb"],["lunch","Lunch","light_mode","#22c55e","#f0fdf4"],["dinner","Dinner","dark_mode","#6366f1","#eef2ff"],["snacks","Snacks","cookie","#f97316","#fff7ed"]].map(([s,lbl,icon,col,bg])=>`
+      ${SLOTS.map(([s,lbl,icon,col,bg])=>`
       <button id="slot_btn_${s}" onclick="selectDietSlot('${s}')"
         style="display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:20px;border:1.5px solid ${window._dietSlot===s?col:"#e2e8f0"};background:${window._dietSlot===s?bg:"#fff"};cursor:pointer;font-family:'Public Sans',sans-serif;white-space:nowrap;transition:all .15s;flex-shrink:0">
         <span class="material-symbols-outlined" style="font-size:14px;color:${col}">${icon}</span>
@@ -1258,45 +1278,100 @@ function showAddToDietModal(slot){
     </div>
 
     ${DB.recipes.length?`
-    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">🍳 Recipes</p>
-    <div class="space-y-2 mb-4">
+    <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🍳 Recipes</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
       ${DB.recipes.map(rec=>{const t=calcTotals(rec.ingredients);return`
-      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-        <div class="flex-1 min-w-0">
-          <p class="font-bold text-sm truncate">${rec.name}</p>
-          <p class="text-xs text-slate-400">${t.cal} kcal · ${t.pro}g protein</p>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:14px;border:1px solid #f1f5f9">
+        ${rec.imageUrl?`<img src="${rec.imageUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0"/>`:
+          `<div style="width:36px;height:36px;border-radius:10px;background:#ffedd5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-outlined" style="font-size:16px;color:#ec5b13">restaurant</span></div>`}
+        <div style="flex:1;min-width:0">
+          <p style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${rec.name}</p>
+          <p style="font-size:11px;color:#94a3b8">${t.cal} kcal · ${t.pro}g protein</p>
         </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <input type="number" id="rqty_${rec.id}" min=".5" step=".5" value="1"
-            class="w-14 bg-white border-[1.5px] border-slate-200 rounded-xl p-2 text-sm font-bold text-center outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
-          <span class="text-xs text-slate-400">srv</span>
-          <button onclick="addRecipeToDietFromModal('${rec.id}')" class="bg-primary text-white font-bold py-2 px-3 rounded-xl text-xs">Add</button>
+            style="width:44px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:6px 4px;font-size:14px;font-weight:700;text-align:center;outline:none;font-family:'Public Sans',sans-serif"/>
+          <button id="addbtn_r_${rec.id}" onclick="addRecipeToDietFromModal('${rec.id}')"
+            style="background:#ec5b13;color:#fff;font-weight:700;padding:7px 12px;border-radius:10px;font-size:12px;border:none;cursor:pointer;font-family:'Public Sans',sans-serif;transition:all .2s;white-space:nowrap">Add</button>
         </div>
       </div>`;}).join("")}
     </div>`:""}
 
     ${lib.length?`
-    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">🥦📦 Ingredients</p>
-    <div class="space-y-2 mb-4">
-      ${lib.map(ing=>`
-      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-        <div class="flex-1 min-w-0">
-          <p class="font-bold text-sm truncate">${ing.label}</p>
-          <p class="text-xs text-slate-400">${ing.cal} kcal · ${(ing.pro||0).toFixed(1)}g protein</p>
+    <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🥦📦 Ingredients</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      ${lib.map(ing=>{
+        const origItem=[...DB.ingredients,...DB.rawIngredients].find(x=>String(x.id)===ing.id);
+        return`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:14px;border:1px solid #f1f5f9">
+        ${origItem?.imageUrl?`<img src="${origItem.imageUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0"/>`:
+          `<div style="width:36px;height:36px;border-radius:10px;background:${ing.type==="pkg"?"#eff6ff":"#f0fdf4"};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-outlined" style="font-size:16px;color:${ing.type==="pkg"?"#3b82f6":"#22c55e"}">${ing.type==="pkg"?"inventory_2":"eco"}</span></div>`}
+        <div style="flex:1;min-width:0">
+          <p style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b">${ing.label}</p>
+          <p style="font-size:11px;color:#94a3b8">${ing.cal} kcal · ${(ing.pro||0).toFixed(1)}g protein</p>
         </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <input type="number" id="iqty_${ing.id}" min=".1" step=".1" value="1"
-            class="w-14 bg-white border-[1.5px] border-slate-200 rounded-xl p-2 text-sm font-bold text-center outline-none focus:border-primary" style="font-family:'Public Sans',sans-serif"/>
-          <span class="text-xs text-slate-400">×</span>
-          <button onclick="addIngToDiet('${ing.id}')" class="bg-success text-white font-bold py-2 px-3 rounded-xl text-xs">Add</button>
+            style="width:44px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:6px 4px;font-size:14px;font-weight:700;text-align:center;outline:none;font-family:'Public Sans',sans-serif"/>
+          <button id="addbtn_i_${ing.id}" onclick="addIngToDiet('${ing.id}')"
+            style="background:#22c55e;color:#fff;font-weight:700;padding:7px 12px;border-radius:10px;font-size:12px;border:none;cursor:pointer;font-family:'Public Sans',sans-serif;transition:all .2s;white-space:nowrap">Add</button>
         </div>
-      </div>`).join("")}
+      </div>`;}).join("")}
     </div>`:""}
 
-    ${!DB.recipes.length&&!lib.length?`<p class="text-sm text-slate-400 text-center py-6">No ingredients or recipes yet.<br/>Add some in the other tabs first.</p>`:""}
+    ${!DB.recipes.length&&!lib.length?`<p style="font-size:13px;color:#94a3b8;text-align:center;padding:24px 0">No ingredients or recipes yet.<br/>Add some in the other tabs first.</p>`:""}
 
-    <button onclick="closeModal()" class="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm">Done</button>
-  `);
+    <!-- Floating Done button -->
+    <div style="position:fixed;bottom:0;left:0;right:0;padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #f1f5f9;z-index:10">
+      <button onclick="closeDietModal()" style="width:100%;background:#1e293b;color:#fff;font-weight:700;padding:14px;border-radius:14px;font-size:14px;border:none;cursor:pointer;font-family:'Public Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">
+        <span class="material-symbols-outlined" style="font-size:16px">check</span>
+        Done
+      </button>
+    </div>
+  </div>`;
+
+  // ── Swipe down to dismiss ──────────────────────────────────────────────────
+  const box = document.getElementById("diet-modal-box");
+  let startY=0, isDragging=false;
+  box.addEventListener("touchstart", e=>{
+    if(e.target.closest("input,button,select")) return;
+    startY=e.touches[0].clientY; isDragging=true;
+  }, {passive:true});
+  box.addEventListener("touchmove", e=>{
+    if(!isDragging) return;
+    const dy=e.touches[0].clientY - startY;
+    if(dy>0) box.style.transform=`translateY(${dy}px)`;
+  }, {passive:true});
+  box.addEventListener("touchend", e=>{
+    if(!isDragging) return; isDragging=false;
+    const dy=e.changedTouches[0].clientY - startY;
+    if(dy>80){ closeDietModal(); }
+    else { box.style.transition="transform .25s ease"; box.style.transform=""; setTimeout(()=>box.style.transition="",300); }
+  });
+}
+
+function closeDietModal(){
+  closeModal();
+  renderDiet(); // refresh diet view to show added items
+}
+
+function updateDietBadge(){
+  const total=Object.values(window._addedItems||{}).reduce((s,v)=>s+v,0);
+  const badge=document.getElementById("diet-added-badge");
+  if(!badge)return;
+  if(total>0){badge.style.display="block";badge.textContent=`${total} added`;}
+  else badge.style.display="none";
+}
+
+function markBtnAdded(btnId){
+  const btn=document.getElementById(btnId);
+  if(!btn)return;
+  btn.style.background="#16a34a";
+  btn.textContent="✓ Added";
+  setTimeout(()=>{
+    btn.style.background = btnId.startsWith("addbtn_r_")?"#ec5b13":"#22c55e";
+    btn.textContent="Add";
+  }, 2000);
 }
 
 function addRecipeToDietFromModal(recId){
@@ -1306,17 +1381,26 @@ function addRecipeToDietFromModal(recId){
   const e=getDay(todayKey());
   const slot=window._dietSlot||"breakfast";
   e.push({name:rec.name,qty,portionLabel:`serving${qty!==1?"s":""}`,cal:t.cal,pro:parseFloat(t.pro),carb:parseFloat(t.carb),fat:parseFloat(t.fat),fib:parseFloat(t.fib),type:"recipe",meal:slot,imageUrl:rec.imageUrl||null,addedAt:new Date().toISOString()});
-  setDay(todayKey(),e);toast(`✓ Added ${rec.name} to ${slot}`);
+  setDay(todayKey(),e);
+  // UI feedback
+  markBtnAdded("addbtn_r_"+recId);
+  window._addedItems=window._addedItems||{};
+  window._addedItems["r_"+recId]=(window._addedItems["r_"+recId]||0)+1;
+  updateDietBadge();
 }
 function addIngToDiet(ingId){
   const lib=allIngs();const ing=lib.find(a=>a.id===String(ingId));if(!ing)return;
   const qty=parseFloat(document.getElementById(`iqty_${ingId}`)?.value)||1;
   const e=getDay(todayKey());
   const slot=window._dietSlot||"breakfast";
-  // Find original item's imageUrl
   const origItem=[...DB.ingredients,...DB.rawIngredients].find(x=>String(x.id)===ing.id);
   e.push({name:ing.label,qty,portionLabel:"portion",cal:Math.round(ing.cal*qty),pro:parseFloat(((ing.pro||0)*qty).toFixed(1)),carb:parseFloat(((ing.carb||0)*qty).toFixed(1)),fat:parseFloat(((ing.fat||0)*qty).toFixed(1)),fib:parseFloat(((ing.fib||0)*qty).toFixed(1)),type:ing.type,meal:slot,imageUrl:origItem?.imageUrl||null,addedAt:new Date().toISOString()});
-  setDay(todayKey(),e);toast(`✓ Added to ${slot}`);
+  setDay(todayKey(),e);
+  // UI feedback
+  markBtnAdded("addbtn_i_"+ingId);
+  window._addedItems=window._addedItems||{};
+  window._addedItems["i_"+ingId]=(window._addedItems["i_"+ingId]||0)+1;
+  updateDietBadge();
 }
 function addRecipeToDiet(recId){
   closeModal();showAddToDietModal("breakfast");
