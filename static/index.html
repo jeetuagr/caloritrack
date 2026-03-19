@@ -225,17 +225,65 @@ async function scanLabel(dataUrl){
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
 }
 async function lookupCalories(items){
-  const sys=`You are a precise nutrition data expert. Return ONLY a raw JSON array, no markdown, no explanation.
-Format: [{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number,"fiberTotal":number}]
+  // Step 1: For each item, check if it looks branded and search for real data
+  const results = [];
+  for(const item of items){
+    const r = await lookupSingleItem(item);
+    results.push(r);
+  }
+  return results;
+}
 
-CRITICAL RULES:
-1. If the item appears to be a BRANDED product (contains brand name, e.g. "Milky Mist", "Amul", "Britannia", "Quaker", "Kellogg's", etc.), use the specific nutritional values for THAT brand, NOT generic values. Branded products often have different macro profiles than generic versions.
-2. Scale all values to the EXACT quantity and unit provided (e.g. 100g, 1 cup).
-3. Always include fiberTotal (use 0 if truly none).
-4. Be as accurate as possible — prioritize branded/specific data over generic USDA values when the item name suggests a specific product.
-5. For Indian branded items, use their known label values (e.g. Milky Mist High Protein Paneer has ~25g protein per 100g, not the generic 18g).`;
-  const t=await callClaude([{role:"user",content:`Provide accurate nutrition data for these specific items (use branded values if brand is mentioned):\n${JSON.stringify(items)}`}],sys);
-  try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return[];}
+async function lookupSingleItem(item){
+  const name = item.name.trim();
+  const qty = item.quantity;
+  const unit = item.unit;
+
+  // Detect if this looks like a branded product
+  const brandedKeywords = /high protein|low fat|low carb|zero sugar|amul|milky mist|milld|yoga bar|saffola|britannia|nestle|kellogg|quaker|patanjali|fortune|aashirvaad|tata|itc|pepsi|coca|maggi|mtr|haldiram|bikaji|parle|sunfeast|good day|marie|tiger|hide.*seek/i;
+  const looksbranded = brandedKeywords.test(name) || /[A-Z][a-z]+\s+[A-Z]/.test(name);
+
+  // For branded items: use server web-search endpoint for real label data
+  if(looksbranded){
+    try{
+      const r = await fetch("/api/nutrition-search", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({name, quantity:qty, unit})
+      });
+      const d = await r.json();
+      if(d.ok && d.nutrition){
+        const n = d.nutrition;
+        return {
+          name, quantity:qty, unit,
+          caloriesTotal: n.calories||0,
+          proteinTotal: n.protein||0,
+          carbsTotal: n.carbs||0,
+          fatTotal: n.fat||0,
+          fiberTotal: n.fiber||0,
+        };
+      }
+    }catch(e){ console.warn("Web search nutrition failed, falling back:", e); }
+  }
+
+  // Standard Claude lookup (good for generics and as fallback)
+  const sys = `You are a nutrition data expert. Return ONLY a raw JSON array (no markdown):
+[{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number,"fiberTotal":number}]
+
+Rules:
+- Scale values to EXACTLY the quantity and unit given.
+- For items with "high protein", "low carb", "low fat" etc in the name, use values that reflect those properties (higher/lower than generic).
+- Include fiberTotal (0 if none).
+- Be precise — do not use generic values for items that clearly have modified nutrient profiles.`;
+
+  const t = await callClaude([{role:"user", content:`Nutrition for: ${JSON.stringify([item])}`}], sys);
+
+  try{
+    const arr = JSON.parse(t.replace(/```json|```/g,"").trim());
+    return arr[0] || {name,quantity:qty,unit,caloriesTotal:0,proteinTotal:0,carbsTotal:0,fatTotal:0,fiberTotal:0};
+  }catch{
+    return {name,quantity:qty,unit,caloriesTotal:0,proteinTotal:0,carbsTotal:0,fatTotal:0,fiberTotal:0};
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -1366,12 +1414,11 @@ function updateDietBadge(){
 function markBtnAdded(btnId){
   const btn=document.getElementById(btnId);
   if(!btn)return;
+  // Stay green permanently for this session — user knows item is added
   btn.style.background="#16a34a";
-  btn.textContent="✓ Added";
-  setTimeout(()=>{
-    btn.style.background = btnId.startsWith("addbtn_r_")?"#ec5b13":"#22c55e";
-    btn.textContent="Add";
-  }, 2000);
+  btn.style.boxShadow="0 2px 8px rgba(22,163,74,.35)";
+  btn.innerHTML='<span style="font-size:13px">✓</span> Added';
+  btn.disabled=false; // still tappable to add more servings
 }
 
 function addRecipeToDietFromModal(recId){

@@ -201,6 +201,65 @@ Output ONLY the raw SVG code starting with <svg and ending with </svg>. No expla
                 self.send_json({"error": str(e)}, 500)
             return
 
+        # ── Branded nutrition lookup with web search ────────────────────────
+        if self.path == "/api/nutrition-search":
+            key = API_KEY
+            if not key:
+                self.send_json({"error": "No API key"}, 401)
+                return
+            item_name = body.get("name", "")
+            quantity = body.get("quantity", 100)
+            unit = body.get("unit", "g")
+
+            # Use Claude with web_search tool to find real branded product data
+            payload = json.dumps({
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 1000,
+                "tools": [{"type": "web_search_20250305", "name": "web_search"}],
+                "system": f"""You are a nutrition expert. The user wants exact nutrition data for a specific food item.
+Search for the product's official nutrition label or a reliable nutrition database entry.
+After searching, return ONLY a JSON object (no markdown):
+{{"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"per":"100g or per serving","source":"url or source name"}}
+Scale values to match: {quantity} {unit}
+Return final scaled values in the JSON.""",
+                "messages": [{
+                    "role": "user",
+                    "content": f'Find the exact nutritional values for: "{item_name}" - {quantity} {unit}. Search for the product label data. Return JSON with scaled values.'
+                }]
+            }).encode()
+
+            req = urllib.request.Request(
+                "https://api.anthropic.com/v1/messages",
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": key,
+                    "anthropic-version": "2023-06-01",
+                },
+                method="POST"
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=45) as resp:
+                    result = json.loads(resp.read())
+
+                # Extract text from response (may be after tool use)
+                text = ""
+                for block in result.get("content", []):
+                    if block.get("type") == "text":
+                        text += block.get("text", "")
+
+                # Try to parse JSON from the response
+                import re
+                json_match = re.search(r'\{[^{}]+\}', text, re.DOTALL)
+                if json_match:
+                    nutrition = json.loads(json_match.group())
+                    self.send_json({"ok": True, "nutrition": nutrition, "raw": text})
+                else:
+                    self.send_json({"ok": False, "raw": text})
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
+            return
+
         self.send_json({"error": "unknown endpoint"}, 404)
 
 
