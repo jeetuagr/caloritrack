@@ -211,20 +211,31 @@ Output ONLY the raw SVG code starting with <svg and ending with </svg>. No expla
             quantity = body.get("quantity", 100)
             unit = body.get("unit", "g")
 
-            # Use Claude with web_search tool to find real branded product data
+            system_prompt = f"""You are a nutrition research expert specializing in Indian branded food products.
+
+Your task: Find the EXACT nutrition label data for the product "{item_name}".
+
+Search strategy:
+1. Search "{item_name} nutrition facts per 100g" on Indian sites
+2. Search on sites like: healthifyme.com, bigbasket.com, 1mg.com, netmeds.com, brand official websites, or Amazon India
+3. Look for the PRODUCT'S OWN LABEL values — not generic food values
+4. For "high protein" variants, the protein WILL be significantly higher than generic (often 20-30g per 100g)
+
+After searching, return ONLY this JSON (no markdown, no explanation):
+{{"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"source":"website name where you found it"}}
+
+These are PER 100g values. Do NOT scale yet.
+If you cannot find the exact product, use the closest branded variant you can find.
+Never fall back to generic USDA values for a branded product."""
+
             payload = json.dumps({
                 "model": "claude-sonnet-4-20250514",
-                "max_tokens": 1000,
+                "max_tokens": 3000,
                 "tools": [{"type": "web_search_20250305", "name": "web_search"}],
-                "system": f"""You are a nutrition expert. The user wants exact nutrition data for a specific food item.
-Search for the product's official nutrition label or a reliable nutrition database entry.
-After searching, return ONLY a JSON object (no markdown):
-{{"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"per":"100g or per serving","source":"url or source name"}}
-Scale values to match: {quantity} {unit}
-Return final scaled values in the JSON.""",
+                "system": system_prompt,
                 "messages": [{
                     "role": "user",
-                    "content": f'Find the exact nutritional values for: "{item_name}" - {quantity} {unit}. Search for the product label data. Return JSON with scaled values.'
+                    "content": f'Search for the exact nutrition label data for: "{item_name}". Find per-100g values from Indian nutrition websites or the brand website. Return the JSON.'
                 }]
             }).encode()
 
@@ -239,23 +250,33 @@ Return final scaled values in the JSON.""",
                 method="POST"
             )
             try:
-                with urllib.request.urlopen(req, timeout=45) as resp:
+                with urllib.request.urlopen(req, timeout=60) as resp:
                     result = json.loads(resp.read())
 
-                # Extract text from response (may be after tool use)
+                # Extract text from all content blocks (tool results + final text)
                 text = ""
                 for block in result.get("content", []):
                     if block.get("type") == "text":
                         text += block.get("text", "")
 
-                # Try to parse JSON from the response
                 import re
-                json_match = re.search(r'\{[^{}]+\}', text, re.DOTALL)
+                # Find JSON in response
+                json_match = re.search(r"\{[^{}]*\"calories\"[^{}]*\}", text, re.DOTALL)
                 if json_match:
-                    nutrition = json.loads(json_match.group())
-                    self.send_json({"ok": True, "nutrition": nutrition, "raw": text})
+                    per100 = json.loads(json_match.group())
+                    # Scale from per-100g to requested quantity
+                    scale = float(quantity) / 100.0 if unit in ["g","ml"] else float(quantity)
+                    nutrition = {
+                        "calories": round((per100.get("calories", 0) or 0) * scale, 1),
+                        "protein":  round((per100.get("protein",  0) or 0) * scale, 1),
+                        "carbs":    round((per100.get("carbs",    0) or 0) * scale, 1),
+                        "fat":      round((per100.get("fat",      0) or 0) * scale, 1),
+                        "fiber":    round((per100.get("fiber",    0) or 0) * scale, 1),
+                        "source":   per100.get("source", "web search"),
+                    }
+                    self.send_json({"ok": True, "nutrition": nutrition})
                 else:
-                    self.send_json({"ok": False, "raw": text})
+                    self.send_json({"ok": False, "raw": text[:500]})
             except Exception as e:
                 self.send_json({"error": str(e)}, 500)
             return

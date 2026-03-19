@@ -176,7 +176,7 @@ function toast(msg,type="s"){
 // CLAUDE API
 // ════════════════════════════════════════════════════════
 async function callClaude(messages,system=""){
-  const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages};
+  const body={model:"claude-sonnet-4-20250514",max_tokens:1500,messages};
   if(system)body.system=system;
   const r=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
@@ -224,66 +224,64 @@ async function scanLabel(dataUrl){
   const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:safeMime,data:parts[1]}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
 }
-async function lookupCalories(items){
-  // Step 1: For each item, check if it looks branded and search for real data
-  const results = [];
-  for(const item of items){
-    const r = await lookupSingleItem(item);
-    results.push(r);
-  }
-  return results;
+// Detect branded products — 3+ words OR known brand/qualifier keywords
+function looksLikeBranded(name){
+  const q=/high.protein|low.fat|low.carb|zero.sugar|sugar.free|whole.wheat|multigrain|fortified|enriched|organic|premium|lite |light |ultra |pro |max |plus /i;
+  const b=/amul|milky.mist|milld|yoga.bar|saffola|britannia|nestle|kellogg|quaker|patanjali|fortune|aashirvaad|tata nutri|itc|maggi|mtr|haldiram|bikaji|parle|sunfeast|bournvita|horlicks|ensure|pediasure|complan|boost|ovaltine|tropicana|real juice|paperboat|acts|rohit|dhara|sundrop|nature fresh|gold winner|gemini|postman|priya|eastern|everest|mdh/i;
+  const words = name.trim().split(/\s+/).length;
+  return b.test(name) || q.test(name) || words >= 3;
 }
 
-async function lookupSingleItem(item){
-  const name = item.name.trim();
-  const qty = item.quantity;
-  const unit = item.unit;
+async function lookupCalories(items){
+  const branded = items.filter(i => looksLikeBranded(i.name));
+  const generic  = items.filter(i => !looksLikeBranded(i.name));
+  const results  = new Array(items.length);
 
-  // Detect if this looks like a branded product
-  const brandedKeywords = /high protein|low fat|low carb|zero sugar|amul|milky mist|milld|yoga bar|saffola|britannia|nestle|kellogg|quaker|patanjali|fortune|aashirvaad|tata|itc|pepsi|coca|maggi|mtr|haldiram|bikaji|parle|sunfeast|good day|marie|tiger|hide.*seek/i;
-  const looksbranded = brandedKeywords.test(name) || /[A-Z][a-z]+\s+[A-Z]/.test(name);
-
-  // For branded items: use server web-search endpoint for real label data
-  if(looksbranded){
-    try{
-      const r = await fetch("/api/nutrition-search", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({name, quantity:qty, unit})
-      });
-      const d = await r.json();
-      if(d.ok && d.nutrition){
-        const n = d.nutrition;
-        return {
-          name, quantity:qty, unit,
-          caloriesTotal: n.calories||0,
-          proteinTotal: n.protein||0,
-          carbsTotal: n.carbs||0,
-          fatTotal: n.fat||0,
-          fiberTotal: n.fiber||0,
-        };
-      }
-    }catch(e){ console.warn("Web search nutrition failed, falling back:", e); }
+  // Branded: parallel web search calls for real label data
+  if(branded.length){
+    const msg = document.getElementById("rawld-msg");
+    if(msg) msg.textContent = `Searching web for branded nutrition data…`;
+    await Promise.all(branded.map(async item => {
+      const idx = items.indexOf(item);
+      try{
+        const r = await fetch("/api/nutrition-search",{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({name:item.name, quantity:item.quantity, unit:item.unit})
+        });
+        const d = await r.json();
+        if(d.ok && d.nutrition){
+          const n = d.nutrition;
+          results[idx] = {name:item.name,quantity:item.quantity,unit:item.unit,
+            caloriesTotal:n.calories||0, proteinTotal:n.protein||0,
+            carbsTotal:n.carbs||0, fatTotal:n.fat||0, fiberTotal:n.fiber||0};
+          return;
+        }
+      }catch(e){ console.warn("Web search failed for",item.name,e); }
+      // Fallback to Claude batch if web search failed
+      const fb = await lookupGenericBatch([item]);
+      results[idx] = fb[0] || {name:item.name,quantity:item.quantity,unit:item.unit,caloriesTotal:0,proteinTotal:0,carbsTotal:0,fatTotal:0,fiberTotal:0};
+    }));
   }
 
-  // Standard Claude lookup (good for generics and as fallback)
-  const sys = `You are a nutrition data expert. Return ONLY a raw JSON array (no markdown):
+  // Generic: single fast batch call
+  if(generic.length){
+    const fb = await lookupGenericBatch(generic);
+    generic.forEach((item,i)=>{
+      results[items.indexOf(item)] = fb[i] || {name:item.name,quantity:item.quantity,unit:item.unit,caloriesTotal:0,proteinTotal:0,carbsTotal:0,fatTotal:0,fiberTotal:0};
+    });
+  }
+
+  return results.filter(Boolean);
+}
+
+async function lookupGenericBatch(items){
+  if(!items.length) return [];
+  const sys = `Return ONLY a raw JSON array (no markdown):
 [{"name":string,"quantity":number,"unit":string,"caloriesTotal":number,"proteinTotal":number,"carbsTotal":number,"fatTotal":number,"fiberTotal":number}]
-
-Rules:
-- Scale values to EXACTLY the quantity and unit given.
-- For items with "high protein", "low carb", "low fat" etc in the name, use values that reflect those properties (higher/lower than generic).
-- Include fiberTotal (0 if none).
-- Be precise — do not use generic values for items that clearly have modified nutrient profiles.`;
-
-  const t = await callClaude([{role:"user", content:`Nutrition for: ${JSON.stringify([item])}`}], sys);
-
-  try{
-    const arr = JSON.parse(t.replace(/```json|```/g,"").trim());
-    return arr[0] || {name,quantity:qty,unit,caloriesTotal:0,proteinTotal:0,carbsTotal:0,fatTotal:0,fiberTotal:0};
-  }catch{
-    return {name,quantity:qty,unit,caloriesTotal:0,proteinTotal:0,carbsTotal:0,fatTotal:0,fiberTotal:0};
-  }
+Scale all values to exact quantity+unit. Include fiberTotal (0 if none).`;
+  const t = await callClaude([{role:"user",content:`Nutrition for: ${JSON.stringify(items)}`}],sys);
+  try{ const a=JSON.parse(t.replace(/\`\`\`json|\`\`\`/g,"").trim()); return Array.isArray(a)?a:[]; }
+  catch{ return []; }
 }
 
 // ════════════════════════════════════════════════════════
@@ -823,7 +821,7 @@ function renderRaw(){
       </button>
     </div>
     <div id="rawld" style="display:none" class="flex items-center gap-2 mt-3 text-slate-400 text-sm">
-      <div class="spin"></div>Querying USDA database…
+      <div class="spin"></div><span id="rawld-msg">Looking up nutrition data…</span>
     </div>
   </div>
 
