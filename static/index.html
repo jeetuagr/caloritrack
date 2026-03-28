@@ -1848,8 +1848,10 @@ function deleteProfile(id){
 // ════════════════════════════════════════════════════════
 let chatHistory = []; // persisted in DB.chatHistory
 
+// ── Chat: build shell once, then only update messages area ──────────────────
+let _chatShellBuilt = false;
+
 function renderChat(){
-  // Load chat history from DB
   if(!DB.chatHistory) DB.chatHistory = [];
   chatHistory = DB.chatHistory;
 
@@ -1857,134 +1859,133 @@ function renderChat(){
   pg.className = "page-content flex-1 max-w-lg mx-auto w-full px-0 pt-0";
   pg.style.paddingBottom = "0";
 
-  pg.innerHTML = `
-  <div style="display:flex;flex-direction:column;height:calc(100dvh - 120px)">
-    <!-- Chat header -->
-    <div style="padding:16px 16px 12px;border-bottom:1px solid #f1f5f9;background:#fff;flex-shrink:0">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="font-size:20px;color:#fff">nutrition</span>
+  // Build the shell only once (or after a full re-navigate)
+  if(!document.getElementById("chat-messages")){
+    _chatShellBuilt = false;
+  }
+
+  if(!_chatShellBuilt){
+    _chatShellBuilt = true;
+    pg.innerHTML = `
+    <div style="display:flex;flex-direction:column;height:calc(100dvh - 120px)">
+      <!-- Header -->
+      <div style="padding:14px 16px 12px;border-bottom:1px solid #f1f5f9;background:#fff;flex-shrink:0">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#fff">nutrition</span>
+            </div>
+            <div>
+              <p style="font-weight:700;font-size:15px;color:#1e293b;margin:0">Minus</p>
+              <p style="font-size:11px;color:#22c55e;font-weight:600;margin:0">● Online · Remembers your history</p>
+            </div>
           </div>
-          <div>
-            <p style="font-weight:700;font-size:15px;color:#1e293b">Nutrition AI</p>
-            <p style="font-size:11px;color:#22c55e;font-weight:600">● Online · Remembers your history</p>
-          </div>
+          <button onclick="clearChatHistory()" style="border:none;background:#fff1f2;color:#f43f5e;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Public Sans',sans-serif">Clear</button>
         </div>
-        <button onclick="clearChatHistory()" style="border:none;background:#fff1f2;color:#f43f5e;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Public Sans',sans-serif">Clear</button>
       </div>
-    </div>
-
-    <!-- Messages area -->
-    <div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f8f6f6">
-      ${chatHistory.length===0?`
-        <!-- Welcome state -->
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:20px">
-          <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="font-size:32px;color:#fff">nutrition</span>
-          </div>
-          <div style="text-align:center">
-            <p style="font-weight:700;font-size:16px;color:#1e293b;margin-bottom:6px">Ask me anything about nutrition</p>
-            <p style="font-size:13px;color:#94a3b8">I know your saved ingredients and recipes</p>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px;width:100%">
-            ${[
-              "What can I make with mushrooms under 300 calories?",
-              "Give me a high protein Indian breakfast recipe",
-              "How do I hit 150g protein today?",
-              "Compare paneer vs tofu for muscle building"
-            ].map(q=>`
-            <button onclick="sendChatSuggestion('${q.replace(/'/g,"\'")}')"
-              style="text-align:left;padding:10px 14px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;font-size:13px;color:#475569;font-weight:500;cursor:pointer;font-family:'Public Sans',sans-serif;transition:border-color .15s"
-              onmouseover="this.style.borderColor='#ec5b13'" onmouseout="this.style.borderColor='#e2e8f0'">
-              ${q}
-            </button>`).join("")}
-          </div>
+      <!-- Messages -->
+      <div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f8f6f6"></div>
+      <!-- Typing indicator — always in DOM, toggled by display -->
+      <div id="chat-typing" style="display:none;padding:0 16px 8px;background:#f8f6f6">${makeChatBubble("__typing__",null)}</div>
+      <!-- Input -->
+      <div style="padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #f1f5f9;flex-shrink:0">
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <textarea id="chat-input" placeholder="Ask Minus about recipes, nutrition…"
+            style="flex:1;border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 14px;font-size:14px;font-family:'Public Sans',sans-serif;outline:none;resize:none;min-height:44px;max-height:120px;line-height:1.4;color:#1e293b;background:#f8fafc"
+            onfocus="this.style.borderColor='#ec5b13'" onblur="this.style.borderColor='#e2e8f0'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+          <button onclick="sendChat()"
+            style="width:44px;height:44px;border-radius:14px;background:#ec5b13;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(236,91,19,.3)">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#fff">send</span>
+          </button>
         </div>
-      `:`
-        <!-- Message bubbles -->
-        ${chatHistory.map((msg,i)=>renderChatMessage(msg,i)).join("")}
-      `}
-      <div id="chat-typing" style="display:none">
-        ${renderChatMessage({role:"assistant",content:"__typing__"},null)}
       </div>
-    </div>
+    </div>`;
+  }
 
-    <!-- Input area -->
-    <div style="padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #f1f5f9;flex-shrink:0">
-      <div style="display:flex;gap:8px;align-items:flex-end">
-        <textarea id="chat-input" placeholder="Ask about recipes, nutrition, meal plans…"
-          style="flex:1;border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 14px;font-size:14px;font-family:'Public Sans',sans-serif;outline:none;resize:none;min-height:44px;max-height:120px;line-height:1.4;color:#1e293b;background:#f8fafc;transition:border-color .15s"
-          onfocus="this.style.borderColor='#ec5b13'" onblur="this.style.borderColor='#e2e8f0'"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
-          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
-        <button onclick="sendChat()" id="chat-send-btn"
-          style="width:44px;height:44px;border-radius:14px;background:#ec5b13;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(236,91,19,.3);transition:transform .1s"
-          ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform=''">
-          <span class="material-symbols-outlined" style="font-size:20px;color:#fff">send</span>
-        </button>
-      </div>
-    </div>
-  </div>`;
-
-  // Scroll to bottom
-  setTimeout(()=>{
-    const el = document.getElementById("chat-messages");
-    if(el) el.scrollTop = el.scrollHeight;
-  }, 50);
+  // Always re-render just the messages area
+  refreshChatMessages();
 }
 
-function renderChatMessage(msg, idx){
-  const isUser = msg.role==="user";
-  const isTyping = msg.content==="__typing__";
+function refreshChatMessages(){
+  const el = document.getElementById("chat-messages");
+  if(!el) return;
 
-  if(isTyping){
-    return `<div style="display:flex;align-items:flex-end;gap:8px">
-      <div style="width:28px;height:28px;border-radius:10px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <span class="material-symbols-outlined" style="font-size:14px;color:#fff">nutrition</span>
+  if(chatHistory.length === 0){
+    el.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:20px;text-align:center">
+        <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center">
+          <span class="material-symbols-outlined" style="font-size:32px;color:#fff">nutrition</span>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:16px;color:#1e293b;margin:0 0 6px">Ask Minus anything about nutrition</p>
+          <p style="font-size:13px;color:#94a3b8;margin:0">Knows your saved ingredients and recipes</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+          ${["What can I make with mushrooms under 300 calories?",
+             "Give me a high protein Indian breakfast recipe",
+             "How do I hit 150g protein today?",
+             "Compare paneer vs tofu for muscle building"
+            ].map(q=>`<button onclick="sendChatSuggestion(this.getAttribute('data-q'))" data-q="${q.replace(/"/g,'&quot;')}"
+              style="text-align:left;padding:10px 14px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;font-size:13px;color:#475569;font-weight:500;cursor:pointer;font-family:'Public Sans',sans-serif">${q}</button>`
+            ).join("")}
+        </div>
+      </div>`;
+  } else {
+    el.innerHTML = chatHistory.map((msg,i) => makeChatBubble(msg.content, i, msg.role)).join("");
+  }
+
+  // Scroll to bottom
+  setTimeout(()=>{ el.scrollTop = el.scrollHeight; }, 30);
+}
+
+function makeChatBubble(content, idx, role){
+  if(content === "__typing__"){
+    return `<div style="display:flex;align-items:flex-start;gap:8px">
+      <div style="width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px">
+        <span class="material-symbols-outlined" style="font-size:13px;color:#fff">nutrition</span>
       </div>
-      <div style="background:#fff;border-radius:18px 18px 18px 4px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-        <div style="display:flex;gap:4px;align-items:center;height:16px">
-          <div style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:typing-dot 1.4s ease-in-out infinite"></div>
-          <div style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:typing-dot 1.4s ease-in-out .2s infinite"></div>
-          <div style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:typing-dot 1.4s ease-in-out .4s infinite"></div>
+      <div style="background:#fff;border-radius:16px 16px 16px 4px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="display:flex;gap:4px;align-items:center;height:14px">
+          <div style="width:5px;height:5px;border-radius:50%;background:#94a3b8;animation:typing-dot 1.4s ease-in-out infinite"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:#94a3b8;animation:typing-dot 1.4s ease-in-out .2s infinite"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:#94a3b8;animation:typing-dot 1.4s ease-in-out .4s infinite"></div>
         </div>
       </div>
     </div>`;
   }
 
-  if(isUser){
-    return `<div style="display:flex;justify-content:flex-end">
-      <div style="max-width:80%;background:#ec5b13;color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;font-size:14px;line-height:1.5;word-break:break-word">
-        ${escapeHtml(msg.content)}
+  if(role === "user"){
+    return `<div style="display:flex;justify-content:flex-end;margin-bottom:2px">
+      <div style="max-width:82%;background:#ec5b13;color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;font-size:14px;line-height:1.5;word-break:break-word">
+        ${escapeHtml(content)}
       </div>
     </div>`;
   }
 
-  // Assistant message — render markdown-ish formatting + save recipe button if present
-  let html = msg.content
+  // Assistant bubble — safe markdown rendering
+  const safe = content
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
     .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
-    .replace(/^#{1,3}\s+(.+)$/gm,"<p style='font-weight:700;font-size:14px;color:#1e293b;margin:8px 0 4px'>$1</p>")
-    .replace(/^[-•]\s+(.+)$/gm,"<div style='display:flex;gap:6px;margin:3px 0'><span style='color:#ec5b13;flex-shrink:0'>•</span><span>$1</span></div>")
+    .replace(/^#{1,3} (.+)$/gm,"<p style='font-weight:700;font-size:14px;color:#1e293b;margin:8px 0 2px'>$1</p>")
+    .replace(/^[•\-] (.+)$/gm,"<div style='display:flex;gap:5px;margin:3px 0'><span style='color:#ec5b13;flex-shrink:0;font-weight:700'>•</span><span>$1</span></div>")
     .replace(/\n\n/g,"<br/><br/>")
     .replace(/\n/g,"<br/>");
 
-  // Check if message has a recipe the user can save
-  const hasSaveBtn = msg.content.includes("##") || msg.content.includes("**Ingredients") || msg.content.includes("Recipe:");
-  const saveBtn = hasSaveBtn&&idx!==null ? `
+  const hasRecipe = content.includes("##") || content.includes("**Ingredients") || content.includes("Recipe:");
+  const saveBtn = (hasRecipe && idx !== null) ? `
     <button onclick="saveRecipeFromChat(${idx})"
       style="margin-top:10px;display:flex;align-items:center;gap:6px;background:#f0fdf4;border:1.5px solid #22c55e;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;color:#16a34a;cursor:pointer;font-family:'Public Sans',sans-serif;width:100%">
-      <span class="material-symbols-outlined" style="font-size:15px">bookmark_add</span>
-      Save this recipe
+      <span class="material-symbols-outlined" style="font-size:14px">bookmark_add</span>Save this recipe
     </button>` : "";
 
-  return `<div style="display:flex;align-items:flex-end;gap:8px">
-    <div style="width:28px;height:28px;border-radius:10px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-start;margin-top:4px">
-      <span class="material-symbols-outlined" style="font-size:14px;color:#fff">nutrition</span>
+  return `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:2px">
+    <div style="width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,#ec5b13,#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px">
+      <span class="material-symbols-outlined" style="font-size:13px;color:#fff">nutrition</span>
     </div>
-    <div style="max-width:85%;background:#fff;border-radius:18px 18px 18px 4px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:14px;color:#1e293b;line-height:1.6;word-break:break-word">
-      ${html}
-      ${saveBtn}
+    <div style="max-width:85%;background:#fff;border-radius:4px 18px 18px 18px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:14px;color:#1e293b;line-height:1.6;word-break:break-word">
+      ${safe}${saveBtn}
     </div>
   </div>`;
 }
@@ -1995,60 +1996,67 @@ function escapeHtml(str){
 
 function sendChatSuggestion(text){
   const inp = document.getElementById("chat-input");
-  if(inp){ inp.value=text; sendChat(); }
+  if(inp){ inp.value = text; sendChat(); }
 }
 
 async function sendChat(){
   const inp = document.getElementById("chat-input");
   const text = (inp?.value||"").trim();
   if(!text) return;
-  inp.value = ""; inp.style.height = "44px";
 
-  // Add user message
+  // Clear input immediately
+  inp.value = "";
+  inp.style.height = "44px";
+
+  // Add to history and refresh messages
   chatHistory.push({role:"user", content:text});
-  renderChat();
+  DB.chatHistory = chatHistory;
+  refreshChatMessages();
 
-  // Show typing indicator
+  // Show typing indicator (it lives outside chat-messages, so never gets cleared)
   const typingEl = document.getElementById("chat-typing");
-  if(typingEl) typingEl.style.display="flex";
+  if(typingEl) typingEl.style.display = "block";
   const msgs = document.getElementById("chat-messages");
-  if(msgs) msgs.scrollTop = msgs.scrollHeight;
+  if(msgs) setTimeout(()=>{ msgs.scrollTop = msgs.scrollHeight; }, 30);
+
+  // Disable send during request
+  const sendBtn = document.querySelector('[onclick="sendChat()"]');
+  if(sendBtn) sendBtn.disabled = true;
 
   try{
-    // Build context about user's library
     const libSummary = [
       DB.rawIngredients.length ? `Saved ingredients: ${DB.rawIngredients.slice(0,20).map(i=>i.name).join(", ")}` : "",
       DB.ingredients.length ? `Packaged items: ${DB.ingredients.slice(0,10).map(i=>i.productName).join(", ")}` : "",
       DB.recipes.length ? `Saved recipes: ${DB.recipes.map(r=>r.name).join(", ")}` : "",
     ].filter(Boolean).join("\n");
 
-    const sys = `You are a friendly expert nutritionist AI assistant built into a calorie tracking app called CaloriTrack.
+    const sys = `You are Minus, a friendly expert nutritionist AI assistant inside a calorie tracking app.
 
 The user's saved food library:
 ${libSummary||"(no items saved yet)"}
 
 Guidelines:
 - Give practical, specific nutrition advice
-- When suggesting recipes, format them clearly with Ingredients and Steps sections
-- Include calorie and macro estimates for recipes you suggest
-- Keep responses concise but complete — use bullet points and headers for recipes
-- When user asks about ingredients from their library, reference them by name
-- Be encouraging and conversational`;
+- Format recipes clearly with Ingredients and Steps sections using ## headers and - bullet points
+- Include calorie and macro estimates for recipes
+- Reference the user's saved ingredients by name when relevant
+- Be concise and conversational`;
 
     const messages = chatHistory.map(m=>({role:m.role, content:m.content}));
     const reply = await callClaude(messages, sys);
 
-    if(typingEl) typingEl.style.display="none";
     chatHistory.push({role:"assistant", content:reply});
     DB.chatHistory = chatHistory;
     saveDB();
-    renderChat();
-  }catch(err){
-    if(typingEl) typingEl.style.display="none";
+  } catch(err){
     chatHistory.push({role:"assistant", content:"Sorry, I had trouble responding. Please try again."});
     DB.chatHistory = chatHistory;
-    renderChat();
   }
+
+  // Hide typing, refresh messages
+  if(typingEl) typingEl.style.display = "none";
+  if(sendBtn) sendBtn.disabled = false;
+  refreshChatMessages();
 }
 
 async function saveRecipeFromChat(msgIdx){
