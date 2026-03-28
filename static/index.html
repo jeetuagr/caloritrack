@@ -121,33 +121,35 @@ body{font-family:'Public Sans',sans-serif;background:#f8f6f6;color:#1e293b;min-h
 
 </div>
 
-<!-- Bottom nav -->
-<nav class="bottom-nav fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 px-4 pt-3 flex items-center justify-around z-50">
-  <button onclick="navigate('dashboard')" id="bn-dashboard" class="flex flex-col items-center gap-0.5 text-primary">
-    <span class="material-symbols-outlined fill-icon text-2xl">home</span>
-    <span class="text-[10px] font-bold">Home</span>
+<!-- Bottom nav — 6 slots: 5 tabs + 1 FAB in centre -->
+<nav class="bottom-nav fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 z-50"
+  style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;align-items:center;padding:6px 4px;padding-bottom:max(6px,env(safe-area-inset-bottom))">
+  <button onclick="navigate('dashboard')" id="bn-dashboard" style="display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;padding:4px 2px;color:#ec5b13">
+    <span class="material-symbols-outlined fill-icon" style="font-size:22px">home</span>
+    <span style="font-size:9px;font-weight:700;font-family:'Public Sans',sans-serif">Home</span>
   </button>
-  <button onclick="navigate('scan')" id="bn-scan" class="flex flex-col items-center gap-0.5 text-slate-400">
-    <span class="material-symbols-outlined text-2xl">qr_code_scanner</span>
-    <span class="text-[10px] font-bold">Scan</span>
+  <button onclick="navigate('scan')" id="bn-scan" style="display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;padding:4px 2px;color:#94a3b8">
+    <span class="material-symbols-outlined" style="font-size:22px">qr_code_scanner</span>
+    <span style="font-size:9px;font-weight:700;font-family:'Public Sans',sans-serif">Scan</span>
   </button>
-  <!-- FAB -->
-  <div class="relative -top-5">
-    <button onclick="navigate('raw')" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-primary/30 border-4 border-white">
-      <span class="material-symbols-outlined text-3xl">add</span>
+  <!-- FAB — centre col -->
+  <div style="display:flex;justify-content:center;align-items:center;position:relative">
+    <button onclick="navigate('raw')"
+      style="width:48px;height:48px;background:#ec5b13;color:#fff;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 12px rgba(236,91,19,.35);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:-18px">
+      <span class="material-symbols-outlined" style="font-size:26px">add</span>
     </button>
   </div>
-  <button onclick="navigate('recipes')" id="bn-recipes" class="flex flex-col items-center gap-0.5 text-slate-400">
-    <span class="material-symbols-outlined text-2xl">restaurant_menu</span>
-    <span class="text-[10px] font-bold">Recipes</span>
+  <button onclick="navigate('recipes')" id="bn-recipes" style="display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;padding:4px 2px;color:#94a3b8">
+    <span class="material-symbols-outlined" style="font-size:22px">restaurant_menu</span>
+    <span style="font-size:9px;font-weight:700;font-family:'Public Sans',sans-serif">Recipes</span>
   </button>
-  <button onclick="navigate('diet')" id="bn-diet" class="flex flex-col items-center gap-0.5 text-slate-400">
-    <span class="material-symbols-outlined text-2xl">calendar_month</span>
-    <span class="text-[10px] font-bold">Diet</span>
+  <button onclick="navigate('diet')" id="bn-diet" style="display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;padding:4px 2px;color:#94a3b8">
+    <span class="material-symbols-outlined" style="font-size:22px">calendar_month</span>
+    <span style="font-size:9px;font-weight:700;font-family:'Public Sans',sans-serif">Diet</span>
   </button>
-  <button onclick="navigate('chat')" id="bn-chat" class="flex flex-col items-center gap-0.5 text-slate-400">
-    <span class="material-symbols-outlined text-2xl">chat</span>
-    <span class="text-[10px] font-bold">Chat</span>
+  <button onclick="navigate('chat')" id="bn-chat" style="display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;padding:4px 2px;color:#94a3b8">
+    <span class="material-symbols-outlined" style="font-size:22px">chat</span>
+    <span style="font-size:9px;font-weight:700;font-family:'Public Sans',sans-serif">Chat</span>
   </button>
 </nav>
 
@@ -356,9 +358,11 @@ function render(){
     const bn=document.getElementById("bn-"+id);
     if(!bn)return;
     const isOn=TAB===id;
-    bn.className=`flex flex-col items-center gap-0.5 ${isOn?"text-primary":"text-slate-400"}`;
+    bn.style.color=isOn?"#ec5b13":"#94a3b8";
     const icon=bn.querySelector(".material-symbols-outlined");
-    if(icon)icon.className=`material-symbols-outlined ${isOn?"fill-icon":""} text-2xl`;
+    if(icon){
+      icon.style.fontVariationSettings=isOn?"'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24":"'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24";
+    }
   });
 
   // Header actions
@@ -1198,22 +1202,21 @@ function renderDiet(){
   const ringColor=pct>100?"#ef4444":pct>85?"#f97316":"#22c55e";
 
   document.getElementById("page").innerHTML=`
-  <!-- Header row -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h2 class="text-2xl font-bold">Daily Diet</h2>
-      <p class="text-slate-400 text-sm mt-0.5">Track meals · plan ahead 7 days</p>
+  <!-- Header row: title left, profile right -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+    <div style="min-width:0">
+      <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin:0;line-height:1.2">Daily Diet</h2>
+      <p style="font-size:12px;color:#94a3b8;margin:3px 0 0;font-weight:500">Track meals · plan ahead 7 days</p>
     </div>
-    <button onclick="showProfileModal()" style="display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;border-radius:20px;padding:6px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;font-family:'Public Sans',sans-serif;flex-shrink:0">
-      <span style="font-size:18px">${prof?.emoji||"😊"}</span>
-      <span style="font-size:13px;font-weight:700;color:#1e293b;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prof?.name||"Me"}</span>
-      <span class="material-symbols-outlined" style="font-size:14px;color:#cbd5e1">expand_more</span>
+    <button onclick="showProfileModal()" style="display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #e2e8f0;border-radius:20px;padding:6px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;font-family:'Public Sans',sans-serif;flex-shrink:0;white-space:nowrap">
+      <span style="font-size:16px">${prof?.emoji||"😊"}</span>
+      <span style="font-size:12px;font-weight:700;color:#1e293b;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prof?.name||"Me"}</span>
+      <span class="material-symbols-outlined" style="font-size:13px;color:#cbd5e1">expand_more</span>
     </button>
   </div>
 
-  <!-- Day selector - Past/Future toggle + calendar -->
-  <div style="margin-top:-4px">
-    <!-- View mode toggle -->
+  <!-- Past/Future toggle + calendar -->
+  <div style="margin-top:0">
     <div style="display:flex;gap:6px;margin-bottom:10px">
       <button onclick="window._dietView='past';dietViewDate=todayKey();renderDiet()"
         style="flex:1;padding:8px;border-radius:12px;border:none;cursor:pointer;font-family:'Public Sans',sans-serif;font-size:12px;font-weight:700;transition:all .15s;${(window._dietView||'past')==='past'?'background:#ec5b13;color:#fff;box-shadow:0 2px 8px rgba(236,91,19,.3)':'background:#f1f5f9;color:#64748b'}">
