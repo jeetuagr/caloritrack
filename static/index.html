@@ -220,8 +220,17 @@ async function scanLabel(dataUrl){
   const parts=dataUrl.split(",");
   const mime=(parts[0].match(/data:(image\/[^;]+)/)||[])[1]||"image/jpeg";
   const safeMime=["image/jpeg","image/png","image/gif","image/webp"].includes(mime)?mime:"image/jpeg";
-  const sys=`You are a nutrition label reader. Return ONLY a raw JSON object, no markdown:\n{"productName":string,"servingSize":string,"caloriesPerServing":number,"protein":number,"carbs":number,"fat":number,"fiber":number|null,"ingredients":string}`;
-  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:safeMime,data:parts[1]}},{type:"text",text:"Extract nutrition info as JSON."}]}],sys);
+  const sys=`You are a nutrition label reader. Extract values from the label image carefully.
+Return ONLY a raw JSON object, no markdown, no extra fields:
+{"productName":string,"servingSize":string,"caloriesPerServing":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"ingredients":string}
+
+CRITICAL RULES:
+- "fiber" = Dietary Fibre / Dietary Fiber — look for BOTH spellings on the label. NEVER return null or 0 if a fibre value is clearly printed on the label.
+- "carbs" = Total Carbohydrates / Total Carbs — the TOP-LEVEL carb number, not net carbs
+- "caloriesPerServing" = Energy in kcal for the stated serving size
+- If a field is truly absent from the label, use 0 (not null)
+- Indian labels often show "Dietary Fibre" — read it carefully, it is NOT the same as Total Carbs`;
+  const t=await callClaude([{role:"user",content:[{type:"image",source:{type:"base64",media_type:safeMime,data:parts[1]}},{type:"text",text:"Read this nutrition label carefully. Extract all values including Dietary Fibre/Fiber. Return JSON only."}]}],sys);
   try{return JSON.parse(t.replace(/```json|```/g,"").trim());}catch{return null;}
 }
 // Detect branded products — 3+ words OR known brand/qualifier keywords
@@ -292,7 +301,7 @@ function fmt(n){return typeof n==="number"?n.toFixed(1):n;}
 
 function allIngs(){
   return[
-    ...DB.ingredients.map(i=>({id:String(i.id),label:i.productName,cal:i.caloriesPerServing,pro:i.protein||0,carb:i.carbs||0,fat:i.fat||0,fib:i.fiber||0,type:"pkg"})),
+    ...DB.ingredients.map(i=>({id:String(i.id),label:i.productName,cal:parseFloat(i.caloriesPerServing)||0,pro:parseFloat(i.protein)||0,carb:parseFloat(i.carbs)||0,fat:parseFloat(i.fat)||0,fib:parseFloat(i.fiber)||0,type:"pkg"})),
     ...DB.rawIngredients.map(i=>({id:String(i.id),label:`${i.name} (${i.quantity}${i.unit})`,cal:i.caloriesTotal||0,pro:i.proteinTotal||0,carb:i.carbsTotal||0,fat:i.fatTotal||0,fib:i.fiberTotal||0,type:"raw"})),
   ];
 }
@@ -634,7 +643,7 @@ function renderScan(){
       <table class="tbl">
         <thead><tr><th>Product</th><th>Serving</th><th>Cal</th><th>Protein</th><th>Carbs</th><th>Net Carbs</th><th>Fibre</th><th>Fat</th><th></th></tr></thead>
         <tbody>
-          ${DB.ingredients.map(i=>{const fib=i.fiber||0;const nc=Math.max(0,(i.carbs||0)-fib);return`
+          ${DB.ingredients.map(i=>{const fib=parseFloat(i.fiber)||0;const nc=Math.max(0,(parseFloat(i.carbs)||0)-fib);return`
           <tr>
             <td>
               <div style="display:flex;align-items:center;gap:8px">
@@ -757,7 +766,7 @@ async function analyzeLabel(){
   }
 }
 function showScanResult(info){
-  const fib=info.fiber||0;const nc=Math.max(0,(info.carbs||0)-fib);
+  const fib=parseFloat(info.fiber)||0;const nc=Math.max(0,parseFloat(info.carbs||0)-fib);
   document.getElementById("scanresult").innerHTML=`
   <div class="mb-3">
     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Save as</label>
@@ -783,7 +792,16 @@ function showScanResult(info){
 async function savePackaged(){
   if(!scanResult)return;
   const name=(document.getElementById("savename")?.value||"").trim()||scanResult.productName;
-  const item={...scanResult,productName:name,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"};
+  // Sanitize: ensure fiber is always a real number, never null/undefined/string
+  const cleanResult = {
+    ...scanResult,
+    fiber:   parseFloat(scanResult.fiber)  || 0,
+    carbs:   parseFloat(scanResult.carbs)  || 0,
+    protein: parseFloat(scanResult.protein)|| 0,
+    fat:     parseFloat(scanResult.fat)    || 0,
+    caloriesPerServing: parseFloat(scanResult.caloriesPerServing) || 0,
+  };
+  const item={...cleanResult,productName:name,id:Date.now(),addedAt:new Date().toISOString(),type:"packaged"};
   DB.ingredients.push(item);
   saveDB();toast(`✓ Saved: ${name}`);scanResult=null;scanCaptured=null;render();
   // Generate image in background and update
@@ -1592,13 +1610,23 @@ function showInstallBanner(){
 // ════════════════════════════════════════════════════════
 function checkMidnightReset(){
   migrateToProfiles();
+  // Fix any existing items where fiber was stored as null/string
+  let needsSave = false;
+  DB.ingredients.forEach(i=>{
+    if(i.fiber===null||i.fiber===undefined||i.fiber==="null"){i.fiber=0;needsSave=true;}
+    else{const f=parseFloat(i.fiber);if(!isNaN(f)&&f!==i.fiber){i.fiber=f;needsSave=true;}}
+  });
+  DB.rawIngredients.forEach(i=>{
+    if(i.fiberTotal===null||i.fiberTotal===undefined||i.fiberTotal==="null"){i.fiberTotal=0;needsSave=true;}
+    else{const f=parseFloat(i.fiberTotal);if(!isNaN(f)&&f!==i.fiberTotal){i.fiberTotal=f;needsSave=true;}}
+  });
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
   const cutKey=cutoff.toISOString().split("T")[0];
   (DB.profiles||[]).forEach(p=>{
     if(!p.dailyDiet)p.dailyDiet={};
     Object.keys(p.dailyDiet).forEach(k=>{if(k<cutKey)delete p.dailyDiet[k];});
   });
-  saveDB();
+  if(needsSave)saveDB();
 }
 
 // ════════════════════════════════════════════════════════
